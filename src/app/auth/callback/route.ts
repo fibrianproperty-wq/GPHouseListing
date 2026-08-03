@@ -26,8 +26,14 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${errorRedirect}no_email`);
     }
 
-    // Check if user is in the allowed_users whitelist
-    const { data: allowedUser } = await supabase
+    // Check if user is in the allowed_users whitelist using admin client to bypass RLS
+    const { createClient: createSupabaseClient } = await import("@supabase/supabase-js");
+    const adminSupabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: allowedUser } = await adminSupabase
       .from("allowed_users")
       .select("id")
       .eq("email", user.email)
