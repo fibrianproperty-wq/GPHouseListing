@@ -1,8 +1,43 @@
-import { GoogleGenAI } from "@google/genai";
-import type { GeminiParsedListing, GeminiSearchParams, BotIntent } from "@/types/listing";
+import type { ParsedListing, SearchParams, BotIntent } from "@/types/listing";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+/**
+ * Helper: call Groq chat completions API
+ */
+async function callGroq(
+  prompt: string,
+  options?: { jsonMode?: boolean }
+): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY belum di-set di environment variables.");
+  }
+
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      ...(options?.jsonMode && { response_format: { type: "json_object" } }),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Groq API error:", errorData);
+    throw new Error(`Groq API Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "";
+}
 
 /**
  * Detect user intent from a Telegram message
@@ -29,9 +64,8 @@ export async function detectIntent(message: string): Promise<BotIntent> {
   if (matchCount >= 3) return "template_parse";
 
   // Otherwise, use AI for intent classification
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: `Kamu adalah classifier intent untuk bot pencarian properti/rumah di Indonesia.
+  const text = await callGroq(
+    `Kamu adalah classifier intent untuk bot pencarian properti/rumah di Indonesia.
 
 Klasifikasikan pesan berikut ke salah satu intent:
 - "search" = user ingin mencari/bertanya tentang stok properti
@@ -40,10 +74,10 @@ Klasifikasikan pesan berikut ke salah satu intent:
 
 Pesan: "${message}"
 
-Jawab HANYA dengan satu kata: search, template_parse, atau help`,
-  });
+Jawab HANYA dengan satu kata: search, template_parse, atau help`
+  );
 
-  const intent = response.text?.trim().toLowerCase();
+  const intent = text.trim().toLowerCase();
   if (intent === "search" || intent === "template_parse" || intent === "help") {
     return intent as BotIntent;
   }
@@ -55,10 +89,10 @@ Jawab HANYA dengan satu kata: search, template_parse, atau help`,
  */
 export async function parseSearchQuery(
   message: string
-): Promise<GeminiSearchParams> {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: `Kamu adalah parser pencarian properti Indonesia. Ekstrak parameter pencarian dari pesan berikut.
+): Promise<SearchParams> {
+  try {
+    const text = await callGroq(
+      `Kamu adalah parser pencarian properti Indonesia. Ekstrak parameter pencarian dari pesan berikut.
 
 Pesan: "${message}"
 
@@ -80,15 +114,17 @@ Contoh konversi harga:
 - "kisaran 500-700 juta" = harga_min: 500000000, harga_max: 700000000
 
 Kembalikan HANYA JSON, tanpa penjelasan.`,
-  });
+      { jsonMode: true }
+    );
 
-  try {
-    const text = response.text?.trim() || "{}";
-    // Remove markdown code fences if present
-    const jsonStr = text.replace(/```(?:json)?\n?/g, "").replace(/\n?```/g, "").trim();
-    return JSON.parse(jsonStr) as GeminiSearchParams;
-  } catch {
-    console.error("Failed to parse search query:", response.text);
+    const jsonStr = text
+      .trim()
+      .replace(/```(?:json)?\n?/g, "")
+      .replace(/\n?```/g, "")
+      .trim();
+    return JSON.parse(jsonStr) as SearchParams;
+  } catch (error) {
+    console.error("Failed to parse search query:", error);
     return {
       kawasan: null,
       harga_min: null,
@@ -105,10 +141,10 @@ Kembalikan HANYA JSON, tanpa penjelasan.`,
  */
 export async function parseListingTemplate(
   message: string
-): Promise<GeminiParsedListing | null> {
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: `Kamu adalah parser template listing properti Indonesia. Ekstrak data dari template/teks berikut.
+): Promise<ParsedListing | null> {
+  try {
+    const text = await callGroq(
+      `Kamu adalah parser template listing properti Indonesia. Ekstrak data dari template/teks berikut.
 
 Teks:
 """
@@ -136,14 +172,17 @@ Aturan konversi harga:
 
 Jika ada field yang tidak ditemukan, isi dengan null (angka) atau string kosong.
 Kembalikan HANYA JSON, tanpa penjelasan.`,
-  });
+      { jsonMode: true }
+    );
 
-  try {
-    const text = response.text?.trim() || "";
-    const jsonStr = text.replace(/```(?:json)?\n?/g, "").replace(/\n?```/g, "").trim();
-    return JSON.parse(jsonStr) as GeminiParsedListing;
-  } catch {
-    console.error("Failed to parse listing template:", response.text);
+    const jsonStr = text
+      .trim()
+      .replace(/```(?:json)?\n?/g, "")
+      .replace(/\n?```/g, "")
+      .trim();
+    return JSON.parse(jsonStr) as ParsedListing;
+  } catch (error) {
+    console.error("Failed to parse listing template:", error);
     return null;
   }
 }

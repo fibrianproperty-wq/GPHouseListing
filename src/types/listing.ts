@@ -99,10 +99,10 @@ export interface TelegramCallbackQuery {
 }
 
 // ============================================================
-// Gemini AI Types
+// AI Types (Groq / LLM)
 // ============================================================
 
-export interface GeminiParsedListing {
+export interface ParsedListing {
   kawasan: string;
   alamat: string;
   lt: number | null;
@@ -115,7 +115,7 @@ export interface GeminiParsedListing {
   agent_name: string;
 }
 
-export interface GeminiSearchParams {
+export interface SearchParams {
   kawasan: string | null;
   harga_min: number | null;
   harga_max: number | null;

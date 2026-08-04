@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendMessage, sendMessageWithKeyboard, answerCallbackQuery, formatListingForTelegram } from "@/lib/telegram";
-import { detectIntent, parseSearchQuery, parseListingTemplate } from "@/lib/gemini";
+import { detectIntent, parseSearchQuery, parseListingTemplate } from "@/lib/groq";
 import type { TelegramUpdate } from "@/types/listing";
 
 // Create a service role client that bypasses RLS (for bot operations)

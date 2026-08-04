@@ -10,7 +10,7 @@ Panduan lengkap untuk setup sistem dari awal hingga siap digunakan.
 - Akun [Supabase](https://supabase.com/) (Free tier)
 - Akun [Google Cloud Console](https://console.cloud.google.com/)
 - Akun [Telegram](https://telegram.org/)
-- Akun [Google AI Studio](https://aistudio.google.com/) untuk Gemini API
+- Akun [Groq](https://console.groq.com/) untuk AI API (Free, tanpa kartu kredit)
 - Akun [Vercel](https://vercel.com/) untuk deployment (Free tier)
 - Akun [GitHub](https://github.com/) untuk repository
 
@@ -104,13 +104,15 @@ VALUES ('987654321', 'Nama Agen Anda');
 
 ---
 
-## Step 4: Dapatkan Gemini API Key 🧠
+## Step 4: Dapatkan Groq API Key 🧠
 
-1. Kunjungi [Google AI Studio](https://aistudio.google.com/)
-2. Login dengan akun Google
-3. Klik **Get API Key** → **Create API Key**
-4. Pilih atau buat Google Cloud Project
-5. **Catat API Key** yang dihasilkan
+1. Kunjungi [Groq Console](https://console.groq.com/)
+2. Sign up dengan Google atau GitHub (gratis, **tanpa kartu kredit**)
+3. Buka menu **API Keys** di sidebar
+4. Klik **Create API Key**
+5. **Catat API Key** yang dihasilkan (format: `gsk_...`)
+
+> ℹ️ Free tier Groq: 30 request/menit, 14.400 request/hari — lebih dari cukup untuk bot Telegram.
 
 ---
 
@@ -124,9 +126,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-# Google Gemini
-GEMINI_API_KEY=AIzaSy...
-GEMINI_MODEL=gemini-2.0-flash
+# Groq AI
+GROQ_API_KEY=gsk_...
 
 # Telegram
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
@@ -266,7 +267,7 @@ curl "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
 - [ ] Admin user ditambahkan ke `allowed_users`
 - [ ] Telegram user ditambahkan ke `allowed_telegram_users`
 - [ ] Google OAuth dikonfigurasi
-- [ ] Gemini API Key didapat
+- [ ] Groq API Key didapat
 - [ ] `.env.local` diisi lengkap
 - [ ] Deploy ke Vercel
 - [ ] Webhook Telegram diaktifkan

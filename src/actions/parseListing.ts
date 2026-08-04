@@ -1,10 +1,10 @@
 "use server";
 
-import type { GeminiParsedListing } from "@/types/listing";
+import type { ParsedListing } from "@/types/listing";
 
 export async function parseListingWithGroq(
   text: string
-): Promise<{ success: boolean; data?: GeminiParsedListing; error?: string }> {
+): Promise<{ success: boolean; data?: ParsedListing; error?: string }> {
   try {
     const apiKey = process.env.GROQ_API_KEY;
     
@@ -73,7 +73,7 @@ Kembalikan HANYA JSON.`;
     // Kadang model mengembalikan markdown code block meskipun dilarang
     const cleanContent = content.replace(/```(?:json)?\n?/g, "").replace(/\n?```/g, "").trim();
     
-    const parsedData = JSON.parse(cleanContent) as GeminiParsedListing;
+    const parsedData = JSON.parse(cleanContent) as ParsedListing;
     return { success: true, data: parsedData };
   } catch (error: any) {
     console.error("Error parsing listing with Groq:", error);
