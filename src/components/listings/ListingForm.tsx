@@ -115,6 +115,78 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
         </div>
       )}
 
+      {/* Smart Paste UI */}
+      {mode === "create" && (
+        <Card className="border-indigo-500/30 bg-indigo-500/5 overflow-hidden">
+          <div className="bg-indigo-500/10 px-5 py-3 border-b border-indigo-500/10 flex items-center justify-between">
+            <h3 className="font-semibold text-sm text-indigo-700 dark:text-indigo-400 flex items-center gap-2">
+              ✨ Smart Input (AI)
+            </h3>
+          </div>
+          <CardContent className="p-5 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Paste pesan WhatsApp dari owner/agen di sini. AI akan otomatis membaca dan mengisi form di bawah.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Textarea
+                placeholder="Paste teks listing di sini..."
+                className="flex-1 min-h-[80px] bg-background/50 focus:bg-background transition-colors"
+                id="smart-paste-input"
+              />
+              <Button
+                type="button"
+                variant="default"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white sm:self-start"
+                onClick={async () => {
+                  const input = document.getElementById("smart-paste-input") as HTMLTextAreaElement;
+                  const text = input.value;
+                  if (!text.trim()) return;
+
+                  // Show loading on button
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const originalText = btn.innerHTML;
+                  btn.innerHTML = '<span class="animate-pulse">Memproses...</span>';
+                  btn.disabled = true;
+
+                  try {
+                    const { parseListingWithGroq } = await import("@/actions/parseListing");
+                    const res = await parseListingWithGroq(text);
+                    
+                    if (res.success && res.data) {
+                      // Update form data
+                      const data = res.data;
+                      setFormData(prev => ({
+                        ...prev,
+                        kawasan: data.kawasan || prev.kawasan,
+                        alamat: data.alamat || prev.alamat,
+                        lt: data.lt || prev.lt,
+                        lb: data.lb || prev.lb,
+                        kt: data.kt || prev.kt,
+                        km: data.km || prev.km,
+                        harga: data.harga || prev.harga,
+                        harga_text: data.harga_text || prev.harga_text,
+                        keterangan: data.keterangan || prev.keterangan,
+                        agent_name: data.agent_name || prev.agent_name,
+                      }));
+                      input.value = ""; // Clear input after success
+                    } else {
+                      setError(res.error || "Gagal memproses teks.");
+                    }
+                  } catch (e) {
+                    setError("Terjadi kesalahan saat memproses Smart Input.");
+                  } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                  }
+                }}
+              >
+                Isi Form Otomatis
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Agent Name - Priority field */}
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-5">

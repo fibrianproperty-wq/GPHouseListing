@@ -13,6 +13,8 @@ export async function GET() {
       serviceRoleKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length ?? 0,
       hasGeminiKey: !!process.env.GEMINI_API_KEY,
       geminiKeyPrefix: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 4) : null,
+      hasGroqKey: !!process.env.GROQ_API_KEY,
+      groqKeyPrefix: process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.substring(0, 4) : null,
     },
   });
 }
