@@ -123,15 +123,10 @@ CREATE POLICY "Allowed users can delete listings"
     )
   );
 
--- Policy: allowed_users - only admins can view
-CREATE POLICY "Admins can view allowed users"
+-- Policy: allowed_users - any authenticated user can view (avoid infinite recursion)
+CREATE POLICY "Users can view allowed users"
   ON allowed_users FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM allowed_users au
-      WHERE au.email = auth.jwt() ->> 'email'
-    )
-  );
+  USING ( auth.role() = 'authenticated' );
 
 -- Policy: allowed_telegram_users - only allowed web users can view
 CREATE POLICY "Allowed users can view telegram whitelist"
