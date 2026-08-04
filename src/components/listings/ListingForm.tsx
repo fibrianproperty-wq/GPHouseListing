@@ -207,6 +207,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                   Clear Teks
                 </Button>
             </div>
+            </div>
           </CardContent>
         </Card>
       )}
