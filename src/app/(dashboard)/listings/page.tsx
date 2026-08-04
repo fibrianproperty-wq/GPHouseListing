@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import type { Listing } from "@/types/listing";
 import { ListingCard } from "@/components/listings/ListingCard";
 import { ListingTable } from "@/components/listings/ListingTable";
@@ -8,8 +8,10 @@ import { ListingFilters } from "@/components/listings/ListingFilters";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2, Building2, Download, Copy } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
-export default function ListingsPage() {
+function ListingsContent() {
+  const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -19,15 +21,15 @@ export default function ListingsPage() {
   const [kawasanOptions, setKawasanOptions] = useState<string[]>([]);
 
   const [filters, setFilters] = useState({
-    search: "",
-    kawasan: "",
-    status: "active",
-    harga_min: "",
-    harga_max: "",
-    kt_min: "",
-    hadap: "",
-    lt_min: "",
-    lb_min: "",
+    search: searchParams.get("search") || "",
+    kawasan: searchParams.get("kawasan") || "",
+    status: searchParams.get("status") || "active",
+    harga_min: searchParams.get("harga_min") || "",
+    harga_max: searchParams.get("harga_max") || "",
+    kt_min: searchParams.get("kt_min") || "",
+    hadap: searchParams.get("hadap") || "",
+    lt_min: searchParams.get("lt_min") || "",
+    lb_min: searchParams.get("lb_min") || "",
   });
 
   const fetchListings = useCallback(async () => {
@@ -235,5 +237,19 @@ export default function ListingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <ListingsContent />
+    </Suspense>
   );
 }
