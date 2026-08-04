@@ -17,7 +17,8 @@ export async function GET() {
       );
     }
 
-    const webhookUrl = `${appUrl}/api/telegram`;
+    const cleanAppUrl = appUrl.replace(/\/+$/, '');
+    const webhookUrl = `${cleanAppUrl}/api/telegram`;
     const result = await setWebhook(webhookUrl, webhookSecret);
 
     if (result) {
