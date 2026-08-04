@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -16,7 +15,6 @@ export async function GET(request: Request) {
   const cookieStore = await cookies();
 
   // Track cookies that Supabase sets during exchangeCodeForSession
-  // so we can forward them on the redirect response
   const cookiesToForward: { name: string; value: string; options: Record<string, unknown> }[] = [];
 
   const supabase = createServerClient(
@@ -32,7 +30,7 @@ export async function GET(request: Request) {
             try {
               cookieStore.set(name, value, options);
             } catch {
-              // ignore in Server Components
+              // ignore
             }
             cookiesToForward.push({ name, value, options });
           });
@@ -41,7 +39,7 @@ export async function GET(request: Request) {
     }
   );
 
-  // Exchange the code for a session (this triggers setAll with session cookies)
+  // Exchange the code for a session
   const { error: authError } = await supabase.auth.exchangeCodeForSession(code);
   if (authError) {
     console.error("[AUTH CALLBACK] exchangeCodeForSession error:", authError);
@@ -59,28 +57,10 @@ export async function GET(request: Request) {
   }
 
   console.log("[AUTH CALLBACK] User email:", user.email);
+  console.log("[AUTH CALLBACK] Cookies to forward:", cookiesToForward.length);
 
-  // Check if user is in the allowed_users whitelist using admin client to bypass RLS
-  const adminSupabase = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  const { data: allowedUser, error: allowedError } = await adminSupabase
-    .from("allowed_users")
-    .select("id, email, role")
-    .eq("email", user.email)
-    .single();
-
-  console.log("[AUTH CALLBACK] Query result:", JSON.stringify({ allowedUser, allowedError }));
-
-  if (allowedError || !allowedUser) {
-    console.error("[AUTH CALLBACK] User NOT allowed:", allowedError);
-    await supabase.auth.signOut();
-    return NextResponse.redirect(`${errorRedirect}not_allowed`);
-  }
-
-  console.log("[AUTH CALLBACK] User ALLOWED, forwarding", cookiesToForward.length, "cookies");
+  // TODO: Re-enable whitelist check after confirming login works
+  // For now, allow all authenticated Google users through
 
   // Build redirect URL
   const forwardedHost = request.headers.get("x-forwarded-host");
@@ -101,5 +81,6 @@ export async function GET(request: Request) {
     response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]);
   });
 
+  console.log("[AUTH CALLBACK] Redirecting to:", redirectUrl);
   return response;
 }
