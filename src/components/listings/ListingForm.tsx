@@ -141,49 +141,50 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                 className="flex-1 min-h-[80px] bg-background/50 focus:bg-background transition-colors"
                 id="smart-paste-input"
               />
-              <Button
-                type="button"
-                variant="default"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white sm:self-start"
-                onClick={async () => {
-                  const input = document.getElementById("smart-paste-input") as HTMLTextAreaElement;
-                  const text = input.value;
-                  if (!text.trim()) return;
+              <div className="flex flex-col gap-2 sm:w-40 shrink-0">
+                <Button
+                  type="button"
+                  variant="default"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white w-full"
+                  onClick={async () => {
+                    const input = document.getElementById("smart-paste-input") as HTMLTextAreaElement;
+                    const text = input.value;
+                    if (!text.trim()) return;
 
-                  // Show loading on button
-                  const btn = document.activeElement as HTMLButtonElement;
-                  const originalText = btn.innerHTML;
-                  btn.innerHTML = '<span class="animate-pulse">Memproses...</span>';
-                  btn.disabled = true;
+                    // Show loading on button
+                    const btn = document.activeElement as HTMLButtonElement;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span class="animate-pulse">Memproses...</span>';
+                    btn.disabled = true;
 
-                  try {
-                    const { parseListingWithGroq } = await import("@/actions/parseListing");
-                    const res = await parseListingWithGroq(text);
-                    
-                    if (res.success && res.data) {
-                      // Update form data
-                      const data = res.data;
-                      setFormData(prev => ({
-                        ...prev,
-                        kawasan: data.kawasan || prev.kawasan,
-                        alamat: data.alamat || prev.alamat,
-                        lt: data.lt || prev.lt,
-                        lb: data.lb || prev.lb,
-                        kt: data.kt || prev.kt,
-                        km: data.km || prev.km,
-                        hadap: data.hadap || prev.hadap,
-                        lantai: data.lantai || prev.lantai,
-                        sertifikat: data.sertifikat || prev.sertifikat,
-                        furnished: data.furnished || prev.furnished,
-                        harga: data.harga || prev.harga,
-                        harga_text: data.harga_text || prev.harga_text,
-                        keterangan: data.keterangan || prev.keterangan,
-                        agent_name: data.agent_name || prev.agent_name,
-                      }));
-                      input.value = ""; // Clear input after success
-                    } else {
-                      setError(res.error || "Gagal memproses teks.");
-                    }
+                    try {
+                      const { parseListingWithGroq } = await import("@/actions/parseListing");
+                      const res = await parseListingWithGroq(text);
+                      
+                      if (res.success && res.data) {
+                        // Update form data
+                        const data = res.data;
+                        setFormData(prev => ({
+                          ...prev,
+                          kawasan: data.kawasan || prev.kawasan,
+                          alamat: data.alamat || prev.alamat,
+                          lt: data.lt || prev.lt,
+                          lb: data.lb || prev.lb,
+                          kt: data.kt || prev.kt,
+                          km: data.km || prev.km,
+                          hadap: data.hadap || prev.hadap,
+                          lantai: data.lantai || prev.lantai,
+                          sertifikat: data.sertifikat || prev.sertifikat,
+                          furnished: data.furnished || prev.furnished,
+                          harga: data.harga || prev.harga,
+                          harga_text: data.harga_text || prev.harga_text,
+                          keterangan: data.keterangan || prev.keterangan,
+                          agent_name: data.agent_name || prev.agent_name,
+                        }));
+                        // Teks tidak dihapus secara otomatis lagi
+                      } else {
+                        setError(res.error || "Gagal memproses teks.");
+                      }
                   } catch (e) {
                     setError("Terjadi kesalahan saat memproses Smart Input.");
                   } finally {
@@ -194,6 +195,17 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
               >
                 Isi Form Otomatis
               </Button>
+              <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+                  onClick={() => {
+                    const input = document.getElementById("smart-paste-input") as HTMLTextAreaElement;
+                    if (input) input.value = "";
+                  }}
+                >
+                  Clear Teks
+                </Button>
             </div>
           </CardContent>
         </Card>
