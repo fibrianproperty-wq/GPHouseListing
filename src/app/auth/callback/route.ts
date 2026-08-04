@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
@@ -9,79 +9,97 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/";
   const errorRedirect = `${origin}/login?error=`;
 
-  if (code) {
-    const supabase = await createClient();
-
-    // Exchange the code for a session
-    const { error: authError } = await supabase.auth.exchangeCodeForSession(code);
-    if (authError) {
-      console.error("[AUTH CALLBACK] exchangeCodeForSession error:", authError);
-      return NextResponse.redirect(`${errorRedirect}auth_failed`);
-    }
-
-    // Get the authenticated user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user?.email) {
-      console.error("[AUTH CALLBACK] No email found for user:", user?.id);
-      return NextResponse.redirect(`${errorRedirect}no_email`);
-    }
-
-    console.log("[AUTH CALLBACK] User email:", user.email);
-
-    // Check if user is in the allowed_users whitelist using admin client to bypass RLS
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const { data: allowedUser, error: allowedError } = await adminSupabase
-      .from("allowed_users")
-      .select("id, email, role")
-      .eq("email", user.email)
-      .single();
-
-    console.log("[AUTH CALLBACK] Allowed user query result:", JSON.stringify({ allowedUser, allowedError }));
-
-    if (allowedError || !allowedUser) {
-      console.error("[AUTH CALLBACK] User NOT allowed. Error:", allowedError, "Data:", allowedUser);
-      await supabase.auth.signOut();
-      return NextResponse.redirect(`${errorRedirect}not_allowed`);
-    }
-
-    console.log("[AUTH CALLBACK] User ALLOWED, redirecting to dashboard");
-
-    // Build redirect URL
-    const forwardedHost = request.headers.get("x-forwarded-host");
-    const isLocalEnv = process.env.NODE_ENV === "development";
-    let redirectUrl: string;
-
-    if (isLocalEnv) {
-      redirectUrl = `${origin}${next}`;
-    } else if (forwardedHost) {
-      redirectUrl = `https://${forwardedHost}${next}`;
-    } else {
-      redirectUrl = `${origin}${next}`;
-    }
-
-    // Create redirect response and forward all cookies so the session persists
-    const response = NextResponse.redirect(redirectUrl);
-    const cookieStore = await cookies();
-    for (const cookie of cookieStore.getAll()) {
-      response.cookies.set(cookie.name, cookie.value, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-    }
-
-    return response;
+  if (!code) {
+    return NextResponse.redirect(`${errorRedirect}no_code`);
   }
 
-  // No code provided
-  return NextResponse.redirect(`${errorRedirect}no_code`);
-}
+  const cookieStore = await cookies();
 
+  // Track cookies that Supabase sets during exchangeCodeForSession
+  // so we can forward them on the redirect response
+  const cookiesToForward: { name: string; value: string; options: Record<string, unknown> }[] = [];
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // ignore in Server Components
+            }
+            cookiesToForward.push({ name, value, options });
+          });
+        },
+      },
+    }
+  );
+
+  // Exchange the code for a session (this triggers setAll with session cookies)
+  const { error: authError } = await supabase.auth.exchangeCodeForSession(code);
+  if (authError) {
+    console.error("[AUTH CALLBACK] exchangeCodeForSession error:", authError);
+    return NextResponse.redirect(`${errorRedirect}auth_failed`);
+  }
+
+  // Get the authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user?.email) {
+    console.error("[AUTH CALLBACK] No email found for user:", user?.id);
+    return NextResponse.redirect(`${errorRedirect}no_email`);
+  }
+
+  console.log("[AUTH CALLBACK] User email:", user.email);
+
+  // Check if user is in the allowed_users whitelist using admin client to bypass RLS
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: allowedUser, error: allowedError } = await adminSupabase
+    .from("allowed_users")
+    .select("id, email, role")
+    .eq("email", user.email)
+    .single();
+
+  console.log("[AUTH CALLBACK] Query result:", JSON.stringify({ allowedUser, allowedError }));
+
+  if (allowedError || !allowedUser) {
+    console.error("[AUTH CALLBACK] User NOT allowed:", allowedError);
+    await supabase.auth.signOut();
+    return NextResponse.redirect(`${errorRedirect}not_allowed`);
+  }
+
+  console.log("[AUTH CALLBACK] User ALLOWED, forwarding", cookiesToForward.length, "cookies");
+
+  // Build redirect URL
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+  let redirectUrl: string;
+
+  if (isLocalEnv) {
+    redirectUrl = `${origin}${next}`;
+  } else if (forwardedHost) {
+    redirectUrl = `https://${forwardedHost}${next}`;
+  } else {
+    redirectUrl = `${origin}${next}`;
+  }
+
+  // Create redirect response and forward all session cookies
+  const response = NextResponse.redirect(redirectUrl);
+  cookiesToForward.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]);
+  });
+
+  return response;
+}
