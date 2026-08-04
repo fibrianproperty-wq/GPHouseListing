@@ -16,8 +16,6 @@ import {
   Calendar,
   Edit,
   ArrowLeft,
-  MessageSquare,
-  Globe,
 } from "lucide-react";
 import { DeleteListingButton } from "@/components/listings/DeleteListingButton";
 import { MarkAsSoldButton } from "@/components/listings/MarkAsSoldButton";
@@ -56,12 +54,7 @@ export default async function ListingDetailPage({
   }
 
   const statusInfo = statusVariants[listing.status] || statusVariants.active;
-  const sourceIcon =
-    listing.source === "telegram" ? (
-      <MessageSquare className="w-4 h-4" />
-    ) : (
-      <Globe className="w-4 h-4" />
-    );
+
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -215,12 +208,8 @@ export default async function ListingDetailPage({
               <span>Agent: <span className="text-foreground font-medium">{listing.agent_name}</span></span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              {sourceIcon}
-              <span>Sumber: <span className="text-foreground font-medium capitalize">{listing.source}</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="w-4 h-4" />
-              <span>Dibuat: {formatDateTime(listing.created_at)}</span>
+              <span>Dibuat oleh <span className="text-foreground font-medium">{listing.created_by || listing.telegram_user_id || "Web"}</span> pada {formatDateTime(listing.created_at)}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="w-4 h-4" />

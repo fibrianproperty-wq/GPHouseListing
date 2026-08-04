@@ -21,6 +21,7 @@ export interface Listing {
   status: 'active' | 'sold' | 'inactive';
   source: 'web' | 'telegram';
   telegram_user_id: string | null;
+  created_by?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -118,6 +118,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+
     const listing = {
       kawasan: body.kawasan || null,
       alamat: body.alamat || null,
@@ -132,6 +135,7 @@ export async function POST(request: Request) {
       status: body.status || "active",
       source: body.source || "web",
       telegram_user_id: body.telegram_user_id || null,
+      created_by: user?.email || null,
     };
 
     const { data, error } = await supabase
