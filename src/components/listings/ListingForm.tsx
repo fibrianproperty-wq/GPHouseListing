@@ -185,7 +185,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                       } else {
                         setError(res.error || "Gagal memproses teks.");
                       }
-                  } catch (e) {
+                  } catch {
                     setError("Terjadi kesalahan saat memproses Smart Input.");
                   } finally {
                     btn.innerHTML = originalText;

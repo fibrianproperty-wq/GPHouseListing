@@ -136,6 +136,9 @@ export interface SearchParams {
   harga_max: number | null;
   kt_min: number | null;
   km_min: number | null;
+  hadap?: string | null;
+  lt_min?: number | null;
+  lb_min?: number | null;
   keyword: string | null;
 }
 
