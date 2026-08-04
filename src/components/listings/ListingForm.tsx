@@ -35,6 +35,10 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
     lb: listing?.lb || "",
     kt: listing?.kt || "",
     km: listing?.km || "",
+    hadap: listing?.hadap || "",
+    lantai: listing?.lantai || "",
+    sertifikat: listing?.sertifikat || "",
+    furnished: listing?.furnished || "",
     harga: listing?.harga || "",
     harga_text: listing?.harga_text || "",
     keterangan: listing?.keterangan || "",
@@ -75,6 +79,10 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
         lb: formData.lb || null,
         kt: formData.kt || null,
         km: formData.km || null,
+        hadap: formData.hadap || null,
+        lantai: formData.lantai || null,
+        sertifikat: formData.sertifikat || null,
+        furnished: formData.furnished || null,
         harga: formData.harga || null,
       };
 
@@ -163,6 +171,10 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                         lb: data.lb || prev.lb,
                         kt: data.kt || prev.kt,
                         km: data.km || prev.km,
+                        hadap: data.hadap || prev.hadap,
+                        lantai: data.lantai || prev.lantai,
+                        sertifikat: data.sertifikat || prev.sertifikat,
+                        furnished: data.furnished || prev.furnished,
                         harga: data.harga || prev.harga,
                         harga_text: data.harga_text || prev.harga_text,
                         keterangan: data.keterangan || prev.keterangan,
@@ -284,6 +296,50 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                 placeholder="2"
                 value={formData.km}
                 onChange={(e) => updateField("km", e.target.value ? Number(e.target.value) : "")}
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="lantai">Lantai</Label>
+              <Input
+                id="lantai"
+                type="number"
+                placeholder="2"
+                value={formData.lantai}
+                onChange={(e) => updateField("lantai", e.target.value ? Number(e.target.value) : "")}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hadap">Hadap</Label>
+              <Input
+                id="hadap"
+                placeholder="contoh: Selatan"
+                value={formData.hadap}
+                onChange={(e) => updateField("hadap", e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="sertifikat">Sertifikat</Label>
+              <Input
+                id="sertifikat"
+                placeholder="contoh: SHM"
+                value={formData.sertifikat}
+                onChange={(e) => updateField("sertifikat", e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label htmlFor="furnished">Furnished</Label>
+              <Input
+                id="furnished"
+                placeholder="contoh: Unfurnished"
+                value={formData.furnished}
+                onChange={(e) => updateField("furnished", e.target.value)}
                 className="mt-1.5"
               />
             </div>

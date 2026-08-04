@@ -106,8 +106,9 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
   "keyword": "keyword_pencarian_lain_atau_null"
 }
 
-Contoh konversi harga:
+Contoh konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
 - "1 M" atau "1 Miliar" = 1000000000
+- "4M" = 4000000000
 - "850 juta" atau "850jt" = 850000000
 - "di bawah 1 M" = harga_max: 1000000000
 - "800jt-an" = harga_min: 750000000, harga_max: 850000000
@@ -159,15 +160,20 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
   "lb": angka_luas_bangunan_m2_atau_null,
   "kt": angka_kamar_tidur_atau_null,
   "km": angka_kamar_mandi_atau_null,
+  "hadap": "arah hadap rumah (Utara/Selatan/Timur/Barat/dll) atau string kosong",
+  "lantai": angka_jumlah_lantai_atau_null,
+  "sertifikat": "jenis sertifikat (SHM/SHGB/AJB/Strata Title/dll) atau string kosong",
+  "furnished": "status furnished (Furnished/Semi-Furnished/Unfurnished) atau string kosong",
   "harga": angka_harga_rupiah,
   "harga_text": "teks harga asli dari template",
-  "keterangan": "keterangan/catatan tambahan",
+  "keterangan": "keterangan/catatan tambahan (carport, kitchen set, dll)",
   "agent_name": "nama agent jika ada, atau string kosong"
 }
 
-Aturan konversi harga:
+Aturan konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
 - "850 Juta" → harga: 850000000, harga_text: "850 Juta"
 - "1.2 M (Nego)" → harga: 1200000000, harga_text: "1.2 M (Nego)"
+- "4M NEGO" → harga: 4000000000, harga_text: "4M NEGO"
 - "Rp 850.000.000" → harga: 850000000
 
 Jika ada field yang tidak ditemukan, isi dengan null (angka) atau string kosong.

@@ -153,6 +153,40 @@ export default async function ListingDetailPage({
             </div>
           </div>
 
+          {/* Additional Specs */}
+          {(listing.lantai || listing.hadap || listing.sertifikat || listing.furnished) && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {listing.lantai && (
+                <div className="bg-muted/50 rounded-xl p-4 text-center">
+                  <Building2 className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-xl font-bold">{listing.lantai}</p>
+                  <p className="text-xs text-muted-foreground">Lantai</p>
+                </div>
+              )}
+              {listing.hadap && (
+                <div className="bg-muted/50 rounded-xl p-4 text-center">
+                  <MapPin className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-xl font-bold">{listing.hadap}</p>
+                  <p className="text-xs text-muted-foreground">Hadap</p>
+                </div>
+              )}
+              {listing.sertifikat && (
+                <div className="bg-muted/50 rounded-xl p-4 text-center">
+                  <Calendar className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-xl font-bold">{listing.sertifikat}</p>
+                  <p className="text-xs text-muted-foreground">Sertifikat</p>
+                </div>
+              )}
+              {listing.furnished && (
+                <div className="bg-muted/50 rounded-xl p-4 text-center">
+                  <Edit className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+                  <p className="text-xl font-bold">{listing.furnished}</p>
+                  <p className="text-xs text-muted-foreground">Furnished</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Keterangan */}
           {listing.keterangan && (
             <>

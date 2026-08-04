@@ -10,6 +10,10 @@ export interface Listing {
   lb: number | null;
   kt: number | null;
   km: number | null;
+  hadap: string | null;
+  lantai: number | null;
+  sertifikat: string | null;
+  furnished: string | null;
   harga: number | null;
   harga_text: string | null;
   keterangan: string | null;
@@ -28,6 +32,10 @@ export interface ListingFormData {
   lb: number | '';
   kt: number | '';
   km: number | '';
+  hadap: string;
+  lantai: number | '';
+  sertifikat: string;
+  furnished: string;
   harga: number | '';
   harga_text: string;
   keterangan: string;
@@ -109,6 +117,10 @@ export interface ParsedListing {
   lb: number | null;
   kt: number | null;
   km: number | null;
+  hadap: string;
+  lantai: number | null;
+  sertifikat: string;
+  furnished: string;
   harga: number | null;
   harga_text: string;
   keterangan: string;

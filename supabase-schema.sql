@@ -38,6 +38,10 @@ CREATE TABLE IF NOT EXISTS listings (
   lb INTEGER,              -- Luas Bangunan (m²)
   kt INTEGER,              -- Kamar Tidur
   km INTEGER,              -- Kamar Mandi
+  hadap TEXT,              -- Hadap (Utara, Selatan, Timur, Barat, dll)
+  lantai INTEGER,          -- Jumlah Lantai
+  sertifikat TEXT,         -- Sertifikat (SHM, SHGB, AJB, dll)
+  furnished TEXT,          -- Status furnished (Furnished, Semi-Furnished, Unfurnished)
   harga BIGINT,            -- Harga dalam Rupiah (contoh: 850000000)
   harga_text TEXT,          -- Harga display (contoh: "850 Juta (Nego)")
   keterangan TEXT,          -- Keterangan tambahan

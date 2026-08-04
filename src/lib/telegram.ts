@@ -131,6 +131,10 @@ export function formatListingForTelegram(listing: {
   lb?: number | null;
   kt?: number | null;
   km?: number | null;
+  hadap?: string | null;
+  lantai?: number | null;
+  sertifikat?: string | null;
+  furnished?: string | null;
   harga?: number | null;
   harga_text?: string | null;
   keterangan?: string | null;
@@ -146,6 +150,10 @@ export function formatListingForTelegram(listing: {
   if (listing.kt || listing.km) {
     lines.push(`🛏️ KT: ${listing.kt || "-"} | 🚿 KM: ${listing.km || "-"}`);
   }
+  if (listing.lantai) lines.push(`🏢 Lantai: ${listing.lantai}`);
+  if (listing.hadap) lines.push(`🧭 Hadap: ${listing.hadap}`);
+  if (listing.sertifikat) lines.push(`📜 Sertifikat: ${listing.sertifikat}`);
+  if (listing.furnished) lines.push(`🪑 ${listing.furnished}`);
   if (listing.harga_text) {
     lines.push(`💰 ${listing.harga_text}`);
   } else if (listing.harga) {
