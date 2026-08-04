@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayoutClient } from "@/components/layout/DashboardLayoutClient";
+import { checkAllowedUser } from "@/lib/auth";
 
 export default async function DashboardLayout({
   children,
@@ -17,11 +18,7 @@ export default async function DashboardLayout({
   }
 
   // Verify user is in allowed list
-  const { data: allowedUser } = await supabase
-    .from("allowed_users")
-    .select("id")
-    .eq("email", user.email)
-    .single();
+  const allowedUser = await checkAllowedUser(user.email);
 
   if (!allowedUser) {
     redirect("/login?error=not_allowed");

@@ -14,14 +14,20 @@ export async function getCurrentUser() {
   return user;
 }
 
+import { createClient as createAdminClient } from "@supabase/supabase-js";
+
 /**
  * Check if a user's email is in the allowed_users whitelist
  */
 export async function checkAllowedUser(
   email: string
 ): Promise<AllowedUser | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const adminSupabase = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data, error } = await adminSupabase
     .from("allowed_users")
     .select("*")
     .eq("email", email)
