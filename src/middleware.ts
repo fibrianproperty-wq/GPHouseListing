@@ -1,7 +1,16 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for test/debug routes
+  if (
+    request.nextUrl.pathname.startsWith("/api/debug") ||
+    request.nextUrl.pathname.startsWith("/test") ||
+    request.nextUrl.pathname.startsWith("/api/version")
+  ) {
+    return NextResponse.next();
+  }
+
   return await updateSession(request);
 }
 
