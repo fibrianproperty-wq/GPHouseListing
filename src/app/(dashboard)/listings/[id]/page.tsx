@@ -20,6 +20,7 @@ import {
   Globe,
 } from "lucide-react";
 import { DeleteListingButton } from "@/components/listings/DeleteListingButton";
+import { MarkAsSoldButton } from "@/components/listings/MarkAsSoldButton";
 
 const statusVariants: Record<string, { label: string; className: string }> = {
   active: {
@@ -73,10 +74,13 @@ export default async function ListingDetailPage({
           </Button>
         </Link>
         <div className="flex items-center gap-2">
+          {listing.status === 'active' && (
+            <MarkAsSoldButton listingId={id} />
+          )}
           <Link href={`/listings/${id}/edit`}>
             <Button variant="outline" className="gap-2">
               <Edit className="w-4 h-4" />
-              Edit
+              <span className="hidden sm:inline">Edit</span>
             </Button>
           </Link>
           <DeleteListingButton listingId={id} />
