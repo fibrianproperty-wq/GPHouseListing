@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -29,9 +30,6 @@ export async function GET(request: Request) {
     }
 
     console.log("[AUTH CALLBACK] User email:", user.email);
-    console.log("[AUTH CALLBACK] SUPABASE_URL exists:", !!process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log("[AUTH CALLBACK] SERVICE_ROLE_KEY exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-    console.log("[AUTH CALLBACK] SERVICE_ROLE_KEY length:", process.env.SUPABASE_SERVICE_ROLE_KEY?.length);
 
     // Check if user is in the allowed_users whitelist using admin client to bypass RLS
     const adminSupabase = createAdminClient(
@@ -48,7 +46,6 @@ export async function GET(request: Request) {
     console.log("[AUTH CALLBACK] Allowed user query result:", JSON.stringify({ allowedUser, allowedError }));
 
     if (allowedError || !allowedUser) {
-      // User is not allowed — sign them out and redirect with error
       console.error("[AUTH CALLBACK] User NOT allowed. Error:", allowedError, "Data:", allowedUser);
       await supabase.auth.signOut();
       return NextResponse.redirect(`${errorRedirect}not_allowed`);
@@ -56,19 +53,35 @@ export async function GET(request: Request) {
 
     console.log("[AUTH CALLBACK] User ALLOWED, redirecting to dashboard");
 
-    // User is allowed — redirect to dashboard
+    // Build redirect URL
     const forwardedHost = request.headers.get("x-forwarded-host");
     const isLocalEnv = process.env.NODE_ENV === "development";
+    let redirectUrl: string;
 
     if (isLocalEnv) {
-      return NextResponse.redirect(`${origin}${next}`);
+      redirectUrl = `${origin}${next}`;
     } else if (forwardedHost) {
-      return NextResponse.redirect(`https://${forwardedHost}${next}`);
+      redirectUrl = `https://${forwardedHost}${next}`;
     } else {
-      return NextResponse.redirect(`${origin}${next}`);
+      redirectUrl = `${origin}${next}`;
     }
+
+    // Create redirect response and forward all cookies so the session persists
+    const response = NextResponse.redirect(redirectUrl);
+    const cookieStore = await cookies();
+    for (const cookie of cookieStore.getAll()) {
+      response.cookies.set(cookie.name, cookie.value, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+    }
+
+    return response;
   }
 
   // No code provided
   return NextResponse.redirect(`${errorRedirect}no_code`);
 }
+
