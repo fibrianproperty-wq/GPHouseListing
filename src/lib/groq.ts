@@ -103,6 +103,9 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
   "harga_max": angka_rupiah_atau_null,
   "kt_min": angka_atau_null,
   "km_min": angka_atau_null,
+  "hadap": "arah hadap rumah (Utara/Selatan/Timur/Barat/dll) atau null",
+  "lt_min": angka_luas_tanah_m2_atau_null,
+  "lb_min": angka_luas_bangunan_m2_atau_null,
   "keyword": "keyword_pencarian_lain_atau_null"
 }
 
@@ -132,6 +135,9 @@ Kembalikan HANYA JSON, tanpa penjelasan.`,
       harga_max: null,
       kt_min: null,
       km_min: null,
+      hadap: null,
+      lt_min: null,
+      lb_min: null,
       keyword: message,
     };
   }

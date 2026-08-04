@@ -22,6 +22,13 @@ export async function GET(request: Request) {
       km_min: searchParams.get("km_min")
         ? Number(searchParams.get("km_min"))
         : undefined,
+      hadap: searchParams.get("hadap") || undefined,
+      lt_min: searchParams.get("lt_min")
+        ? Number(searchParams.get("lt_min"))
+        : undefined,
+      lb_min: searchParams.get("lb_min")
+        ? Number(searchParams.get("lb_min"))
+        : undefined,
       status: searchParams.get("status") || "active",
       search: searchParams.get("search") || undefined,
       page: searchParams.get("page") ? Number(searchParams.get("page")) : 1,
@@ -40,6 +47,9 @@ export async function GET(request: Request) {
     if (params.kawasan) {
       query = query.ilike("kawasan", `%${params.kawasan}%`);
     }
+    if (params.hadap) {
+      query = query.ilike("hadap", `%${params.hadap}%`);
+    }
     if (params.harga_min) {
       query = query.gte("harga", params.harga_min);
     }
@@ -51,6 +61,12 @@ export async function GET(request: Request) {
     }
     if (params.km_min) {
       query = query.gte("km", params.km_min);
+    }
+    if (params.lt_min) {
+      query = query.gte("lt", params.lt_min);
+    }
+    if (params.lb_min) {
+      query = query.gte("lb", params.lb_min);
     }
     if (params.search) {
       query = query.or(

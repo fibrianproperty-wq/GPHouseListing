@@ -49,6 +49,9 @@ export interface ListingSearchParams {
   harga_max?: number;
   kt_min?: number;
   km_min?: number;
+  hadap?: string;
+  lt_min?: number;
+  lb_min?: number;
   status?: string;
   search?: string;
   page?: number;

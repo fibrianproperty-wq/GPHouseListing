@@ -6,7 +6,7 @@ import {
   Building2,
   LayoutDashboard,
   List,
-  PlusCircle,
+  Sparkles,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,9 +29,9 @@ const navItems = [
     icon: List,
   },
   {
-    label: "Tambah Listing",
-    href: "/listings/new",
-    icon: PlusCircle,
+    label: "Smart Search",
+    href: "/smart-search",
+    icon: Sparkles,
   },
 ];
 
@@ -81,7 +81,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(item.href);
+                : item.href === "/listings" 
+                  ? pathname === "/listings"
+                  : pathname.startsWith(item.href);
 
             return (
               <Link

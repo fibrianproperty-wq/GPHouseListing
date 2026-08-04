@@ -19,6 +19,9 @@ interface FilterValues {
   harga_min: string;
   harga_max: string;
   kt_min: string;
+  hadap: string;
+  lt_min: string;
+  lb_min: string;
 }
 
 interface ListingFiltersProps {
@@ -51,6 +54,9 @@ export function ListingFilters({
       harga_min: "",
       harga_max: "",
       kt_min: "",
+      hadap: "",
+      lt_min: "",
+      lb_min: "",
     });
   }, [onFilterChange]);
 
@@ -60,7 +66,10 @@ export function ListingFilters({
     filters.status !== "active" ||
     filters.harga_min ||
     filters.harga_max ||
-    filters.kt_min;
+    filters.kt_min ||
+    filters.hadap ||
+    filters.lt_min ||
+    filters.lb_min;
 
   return (
     <div className="space-y-3">
@@ -165,6 +174,29 @@ export function ListingFilters({
             <SelectItem value="5">≥ 5 KT</SelectItem>
           </SelectContent>
         </Select>
+
+        <Input
+          placeholder="Hadap (Cth: Selatan)"
+          value={filters.hadap || ""}
+          onChange={(e) => updateFilter("hadap", e.target.value)}
+          className="w-[140px] h-9 text-sm"
+        />
+
+        <Input
+          type="number"
+          placeholder="Min LT (m²)"
+          value={filters.lt_min || ""}
+          onChange={(e) => updateFilter("lt_min", e.target.value)}
+          className="w-[110px] h-9 text-sm"
+        />
+
+        <Input
+          type="number"
+          placeholder="Min LB (m²)"
+          value={filters.lb_min || ""}
+          onChange={(e) => updateFilter("lb_min", e.target.value)}
+          className="w-[110px] h-9 text-sm"
+        />
 
         {hasActiveFilters && (
           <Button

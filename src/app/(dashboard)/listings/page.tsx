@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/listings/ListingCard";
 import { ListingTable } from "@/components/listings/ListingTable";
 import { ListingFilters } from "@/components/listings/ListingFilters";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, Building2 } from "lucide-react";
+import { PlusCircle, Loader2, Building2, Download, Copy } from "lucide-react";
 import Link from "next/link";
 
 export default function ListingsPage() {
@@ -25,6 +25,9 @@ export default function ListingsPage() {
     harga_min: "",
     harga_max: "",
     kt_min: "",
+    hadap: "",
+    lt_min: "",
+    lb_min: "",
   });
 
   const fetchListings = useCallback(async () => {
@@ -37,6 +40,9 @@ export default function ListingsPage() {
       if (filters.harga_min) params.set("harga_min", filters.harga_min);
       if (filters.harga_max) params.set("harga_max", filters.harga_max);
       if (filters.kt_min) params.set("kt_min", filters.kt_min);
+      if (filters.hadap) params.set("hadap", filters.hadap);
+      if (filters.lt_min) params.set("lt_min", filters.lt_min);
+      if (filters.lb_min) params.set("lb_min", filters.lb_min);
       params.set("page", page.toString());
       params.set("limit", "20");
 
@@ -79,6 +85,62 @@ export default function ListingsPage() {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
+  const exportToCSV = () => {
+    if (listings.length === 0) return;
+    
+    const headers = ["Kawasan", "Alamat", "LT", "LB", "KT", "KM", "Lantai", "Hadap", "Sertifikat", "Furnished", "Harga", "Harga Text", "Keterangan", "Agent", "Status"];
+    const rows = listings.map(l => [
+      l.kawasan || "",
+      l.alamat || "",
+      l.lt || "",
+      l.lb || "",
+      l.kt || "",
+      l.km || "",
+      l.lantai || "",
+      l.hadap || "",
+      l.sertifikat || "",
+      l.furnished || "",
+      l.harga || "",
+      l.harga_text || "",
+      l.keterangan ? l.keterangan.replace(/\n/g, " ") : "",
+      l.agent_name || "",
+      l.status
+    ]);
+    
+    const csvContent = [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "listings_export.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const copyResults = async () => {
+    if (listings.length === 0) return;
+    
+    const text = listings.map(l => {
+      let res = `🏠 *${l.kawasan || "N/A"}*\n`;
+      if (l.alamat) res += `📍 ${l.alamat}\n`;
+      if (l.lt || l.lb) res += `📐 LT: ${l.lt || "-"} m² | LB: ${l.lb || "-"} m²\n`;
+      if (l.kt || l.km) res += `🛏️ KT: ${l.kt || "-"} | 🚿 KM: ${l.km || "-"}\n`;
+      if (l.hadap) res += `🧭 Hadap: ${l.hadap}\n`;
+      if (l.harga_text) res += `💰 ${l.harga_text}\n`;
+      else if (l.harga) res += `💰 Rp ${l.harga.toLocaleString("id-ID")}\n`;
+      return res;
+    }).join("\n---\n\n");
+
+    try {
+      await navigator.clipboard.writeText(`Hasil Pencarian:\n\n${text}`);
+      alert("Hasil disalin ke clipboard!");
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Page Title */}
@@ -89,12 +151,22 @@ export default function ListingsPage() {
             {totalCount} listing ditemukan
           </p>
         </div>
-        <Link href="/listings/new">
-          <Button className="gap-2 shadow-md">
-            <PlusCircle className="w-4 h-4" />
-            Tambah Listing
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={copyResults} disabled={listings.length === 0}>
+            <Copy className="w-4 h-4" />
+            <span className="hidden sm:inline">Copy Hasil</span>
           </Button>
-        </Link>
+          <Button variant="outline" className="gap-2" onClick={exportToCSV} disabled={listings.length === 0}>
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </Button>
+          <Link href="/listings/new">
+            <Button className="gap-2 shadow-md">
+              <PlusCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Tambah Listing</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
