@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -14,9 +14,21 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Property Hub — Manajemen Listing Properti",
-  description:
-    "Sistem manajemen listing properti internal untuk tim agen properti. Dilengkapi AI Telegram Bot untuk pencarian stok cepat.",
+  title: "Property Hub",
+  description: "Dashboard Manajemen Listing Properti",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Property Hub",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#4f46e5",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
