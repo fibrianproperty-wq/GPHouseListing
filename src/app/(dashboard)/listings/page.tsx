@@ -14,11 +14,12 @@ function ListingsContent() {
   const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [kawasanOptions, setKawasanOptions] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
   const [filters, setFilters] = useState({
     search: searchParams.get("search") || "",
@@ -87,38 +88,66 @@ function ListingsContent() {
     return () => clearTimeout(timer);
   }, [filters.search]);
 
-  const exportToCSV = () => {
-    if (listings.length === 0) return;
+  const exportToCSV = async () => {
+    if (totalCount === 0) return;
+    setIsExporting(true);
     
-    const headers = ["Kawasan", "Alamat", "LT", "LB", "KT", "KM", "Lantai", "Hadap", "Sertifikat", "Furnished", "Harga", "Harga Text", "Keterangan", "Agent", "Status"];
-    const rows = listings.map(l => [
-      l.kawasan || "",
-      l.alamat || "",
-      l.lt || "",
-      l.lb || "",
-      l.kt || "",
-      l.km || "",
-      l.lantai || "",
-      l.hadap || "",
-      l.sertifikat || "",
-      l.furnished || "",
-      l.harga || "",
-      l.harga_text || "",
-      l.keterangan ? l.keterangan.replace(/\n/g, " ") : "",
-      l.agent_name || "",
-      l.status
-    ]);
-    
-    const csvContent = [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "listings_export.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // Fetch all data respecting filters but without pagination limit (up to 1000)
+      const params = new URLSearchParams();
+      if (filters.search) params.set("search", filters.search);
+      if (filters.kawasan) params.set("kawasan", filters.kawasan);
+      if (filters.status) params.set("status", filters.status);
+      if (filters.harga_min) params.set("harga_min", filters.harga_min);
+      if (filters.harga_max) params.set("harga_max", filters.harga_max);
+      if (filters.kt_min) params.set("kt_min", filters.kt_min);
+      if (filters.hadap) params.set("hadap", filters.hadap);
+      if (filters.lt_min) params.set("lt_min", filters.lt_min);
+      if (filters.lb_min) params.set("lb_min", filters.lb_min);
+      params.set("page", "1");
+      params.set("limit", "1000"); // fetch up to 1000 for export
+
+      const response = await fetch(`/api/listings?${params.toString()}`);
+      const result = await response.json();
+      
+      const exportData: Listing[] = result.data || [];
+      if (exportData.length === 0) return;
+
+      const headers = ["Kawasan", "Alamat", "LT", "LB", "KT", "KM", "Lantai", "Hadap", "Sertifikat", "Furnished", "Harga", "Harga Text", "Keterangan", "Agent", "Status"];
+      const rows = exportData.map(l => [
+        l.kawasan || "",
+        l.alamat || "",
+        l.lt || "",
+        l.lb || "",
+        l.kt || "",
+        l.km || "",
+        l.lantai || "",
+        l.hadap || "",
+        l.sertifikat || "",
+        l.furnished || "",
+        l.harga || "",
+        l.harga_text || "",
+        l.keterangan ? l.keterangan.replace(/\n/g, " ") : "",
+        l.agent_name || "",
+        l.status
+      ]);
+      
+      const csvContent = [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "listings_export.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Gagal mengekspor data.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const copyResults = async () => {
@@ -158,9 +187,9 @@ function ListingsContent() {
             <Copy className="w-4 h-4" />
             <span className="hidden sm:inline">Copy Hasil</span>
           </Button>
-          <Button variant="outline" className="gap-2" onClick={exportToCSV} disabled={listings.length === 0}>
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export CSV</span>
+          <Button variant="outline" className="gap-2" onClick={exportToCSV} disabled={listings.length === 0 || isExporting}>
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            <span className="hidden sm:inline">{isExporting ? "Mengekspor..." : "Export CSV"}</span>
           </Button>
           <Link href="/listings/new">
             <Button className="gap-2 shadow-md">

@@ -45,7 +45,10 @@ export async function GET(request: Request) {
       query = query.eq("status", params.status);
     }
     if (params.kawasan) {
-      query = query.ilike("kawasan", `%${params.kawasan}%`);
+      const kawasanArray = params.kawasan.split(",").map(k => k.trim()).filter(Boolean);
+      if (kawasanArray.length > 0) {
+        query = query.in("kawasan", kawasanArray);
+      }
     }
     if (params.hadap) {
       query = query.ilike("hadap", `%${params.hadap}%`);
