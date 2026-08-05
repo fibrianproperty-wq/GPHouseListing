@@ -67,29 +67,78 @@ export default function AIAssistantPage() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'id-ID';
-    recognition.interimResults = false;
+    recognition.continuous = true; // Keep listening until user stops it manually
+    recognition.interimResults = true; // Show results while talking
     recognition.maxAlternatives = 1;
+
+    // We store the current final transcript string in a ref so interim results can be appended properly.
+    let finalTranscript = "";
 
     recognition.onstart = () => {
       setIsListening(true);
+      (window as any)._currentRecognition = recognition;
     };
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
-      setIsListening(false);
+      let interimTranscript = "";
+      let currentFinal = "";
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          currentFinal += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      // Filter filler words (ah, eh, em, hmm)
+      const filterFillers = (text: string) => {
+        return text.replace(/\b(ah|eh|em|hmm|ehm|oh)\b/gi, "").replace(/\s+/g, " ").trim();
+      };
+
+      if (currentFinal) {
+        finalTranscript += " " + filterFillers(currentFinal);
+        setInput(prev => {
+          // If the user already typed something, keep it
+          const base = prev.replace(interimTranscript, "").trim();
+          return (base + " " + filterFillers(currentFinal)).trim();
+        });
+      } else if (interimTranscript) {
+        setInput(prev => {
+          // just append interim temporarily
+          return prev + " " + interimTranscript;
+        });
+      }
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech recognition error", event.error);
-      setIsListening(false);
+      if (event.error !== "no-speech") {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      }
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      (window as any)._currentRecognition = null;
     };
 
     recognition.start();
+  };
+
+  const stopListening = () => {
+    if ((window as any)._currentRecognition) {
+      (window as any)._currentRecognition.stop();
+    }
+    setIsListening(false);
+  };
+
+  const handleToggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      toggleListening();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -325,7 +374,7 @@ export default function AIAssistantPage() {
             type="button"
             variant="outline"
             size="icon"
-            onClick={toggleListening}
+            onClick={handleToggleListening}
             className={`rounded-xl w-12 h-12 shrink-0 shadow-sm transition-all ${isListening ? 'bg-red-50 text-red-500 border-red-200 animate-pulse' : ''}`}
             disabled={isLoading}
             title={isListening ? "Mendengarkan..." : "Bicara (Voice to Text)"}
