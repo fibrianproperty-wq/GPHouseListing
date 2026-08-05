@@ -46,6 +46,10 @@ CREATE TABLE IF NOT EXISTS listings (
   harga_text TEXT,          -- Harga display (contoh: "850 Juta (Nego)")
   keterangan TEXT,          -- Keterangan tambahan
   photo_link TEXT,
+  kondisi TEXT CHECK (kondisi IN ('Baru', 'Lama', 'N/A')),
+  jenis_properti TEXT CHECK (jenis_properti IN ('Rumah', 'Ruko', 'Kavling', 'Gudang', 'Villa', 'Lainnya')),
+  ketersediaan TEXT CHECK (ketersediaan IN ('Indent', 'Ready', 'N/A')),
+  tipe_transaksi TEXT CHECK (tipe_transaksi IN ('Jual', 'Sewa', 'Jual/Sewa')),
   agent_name TEXT NOT NULL, -- Nama agent (field manual)
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'sold', 'inactive')),
   source TEXT DEFAULT 'web' CHECK (source IN ('web', 'telegram')),
@@ -172,3 +176,12 @@ CREATE POLICY "Allowed users can view telegram whitelist"
 -- ============================================================
 -- Run this manually to add the new optional photo link column
 -- ALTER TABLE listings ADD COLUMN photo_link TEXT;
+
+-- ============================================================
+-- 10. Add 4 new property spec columns
+-- ============================================================
+-- Run this manually to add the new columns
+-- ALTER TABLE listings ADD COLUMN kondisi TEXT CHECK (kondisi IN ('Baru', 'Lama', 'N/A'));
+-- ALTER TABLE listings ADD COLUMN jenis_properti TEXT CHECK (jenis_properti IN ('Rumah', 'Ruko', 'Kavling', 'Gudang', 'Villa', 'Lainnya'));
+-- ALTER TABLE listings ADD COLUMN ketersediaan TEXT CHECK (ketersediaan IN ('Indent', 'Ready', 'N/A'));
+-- ALTER TABLE listings ADD COLUMN tipe_transaksi TEXT CHECK (tipe_transaksi IN ('Jual', 'Sewa', 'Jual/Sewa'));

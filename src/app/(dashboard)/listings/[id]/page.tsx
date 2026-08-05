@@ -108,8 +108,18 @@ export default async function ListingDetailPage({
                 <Building2 className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">
+                <h1 className="text-xl font-bold flex flex-wrap items-center gap-2">
                   {listing.kawasan || "N/A"}
+                  {listing.tipe_transaksi && (
+                    <Badge variant="secondary" className="text-xs">
+                      {listing.tipe_transaksi}
+                    </Badge>
+                  )}
+                  {listing.jenis_properti && (
+                    <Badge variant="outline" className="text-xs bg-blue-50/50 text-blue-700 border-blue-200">
+                      {listing.jenis_properti}
+                    </Badge>
+                  )}
                 </h1>
                 {listing.alamat && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -119,9 +129,25 @@ export default async function ListingDetailPage({
                 )}
               </div>
             </div>
-            <Badge variant="outline" className={statusInfo.className}>
-              {statusInfo.label}
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+              <Badge variant="outline" className={statusInfo.className}>
+                {statusInfo.label}
+              </Badge>
+              {(listing.kondisi || listing.ketersediaan) && (
+                <div className="flex items-center gap-1.5">
+                  {listing.kondisi && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                      {listing.kondisi}
+                    </Badge>
+                  )}
+                  {listing.ketersediaan && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                      {listing.ketersediaan}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <Separator />

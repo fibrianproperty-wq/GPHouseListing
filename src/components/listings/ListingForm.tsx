@@ -43,6 +43,10 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
     harga_text: listing?.harga_text || "",
     keterangan: listing?.keterangan || "",
     photo_link: listing?.photo_link || "",
+    kondisi: listing?.kondisi || "",
+    jenis_properti: listing?.jenis_properti || "",
+    ketersediaan: listing?.ketersediaan || "",
+    tipe_transaksi: listing?.tipe_transaksi || "",
     agent_name: listing?.agent_name || "",
     status: listing?.status || "active",
   });
@@ -230,6 +234,86 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
           <p className="text-xs text-muted-foreground mt-1.5">
             Nama agent yang bertanggung jawab atas listing ini.
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Tipe & Status */}
+      <Card>
+        <CardContent className="p-5 space-y-4">
+          <h3 className="font-semibold text-sm">🏠 Tipe & Status Properti</h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="jenis_properti">Jenis Properti</Label>
+              <Select
+                value={formData.jenis_properti}
+                onValueChange={(v) => updateField("jenis_properti", v)}
+              >
+                <SelectTrigger className="mt-1.5" id="jenis_properti">
+                  <SelectValue placeholder="Pilih Jenis" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Rumah">Rumah</SelectItem>
+                  <SelectItem value="Ruko">Ruko</SelectItem>
+                  <SelectItem value="Kavling">Kavling</SelectItem>
+                  <SelectItem value="Gudang">Gudang</SelectItem>
+                  <SelectItem value="Villa">Villa</SelectItem>
+                  <SelectItem value="Lainnya">Lainnya</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="tipe_transaksi">Tipe Transaksi</Label>
+              <Select
+                value={formData.tipe_transaksi}
+                onValueChange={(v) => updateField("tipe_transaksi", v)}
+              >
+                <SelectTrigger className="mt-1.5" id="tipe_transaksi">
+                  <SelectValue placeholder="Pilih Tipe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Jual">Jual</SelectItem>
+                  <SelectItem value="Sewa">Sewa</SelectItem>
+                  <SelectItem value="Jual/Sewa">Jual/Sewa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="kondisi">Kondisi Bangunan</Label>
+              <Select
+                value={formData.kondisi}
+                onValueChange={(v) => updateField("kondisi", v)}
+              >
+                <SelectTrigger className="mt-1.5" id="kondisi">
+                  <SelectValue placeholder="Pilih Kondisi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Baru">Baru</SelectItem>
+                  <SelectItem value="Lama">Lama</SelectItem>
+                  <SelectItem value="N/A">N/A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="ketersediaan">Status Pembangunan</Label>
+              <Select
+                value={formData.ketersediaan}
+                onValueChange={(v) => updateField("ketersediaan", v)}
+              >
+                <SelectTrigger className="mt-1.5" id="ketersediaan">
+                  <SelectValue placeholder="Pilih Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ready">Ready</SelectItem>
+                  <SelectItem value="Indent">Indent</SelectItem>
+                  <SelectItem value="N/A">N/A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

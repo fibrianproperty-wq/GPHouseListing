@@ -54,6 +54,9 @@ export async function POST(request: Request) {
       if (searchParams.harga_max) query = query.lte("harga", searchParams.harga_max);
       if (searchParams.kt_min) query = query.gte("kt", searchParams.kt_min);
       if (searchParams.km_min) query = query.gte("km", searchParams.km_min);
+      if (searchParams.keyword) {
+        query = query.or(`kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%`);
+      }
 
       const { data: listings, error } = await query;
       if (error) throw error;

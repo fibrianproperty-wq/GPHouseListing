@@ -78,6 +78,10 @@ export async function PUT(
       "harga_text",
       "keterangan",
       "photo_link",
+      "kondisi",
+      "jenis_properti",
+      "ketersediaan",
+      "tipe_transaksi",
       "agent_name",
       "status",
     ];

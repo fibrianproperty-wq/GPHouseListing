@@ -155,15 +155,14 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
 }
 
 Contoh konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
-- "1 M" atau "1 Miliar" = 1000000000
-- "4M" = 4000000000
-- "850 juta" atau "850jt" = 850000000
-- "di bawah 1 M" = harga_max: 1000000000
+- "1 M" atau "1 Miliar" = harga_min: 800000000, harga_max: 1200000000 (beri range toleransi +-20% jika menyebut angka spesifik tanpa batas)
+- "4M" = harga_min: 3500000000, harga_max: 4500000000 (beri range toleransi +- 500juta)
+- "di bawah 1 M" = harga_max: 1000000000, harga_min: null
 - "800jt-an" = harga_min: 750000000, harga_max: 850000000
 - "kisaran 500-700 juta" = harga_min: 500000000, harga_max: 700000000
-- "harga 4m" = harga_max: 4000000000 (asumsi batas atas)
 
 ATURAN SANGAT PENTING:
+Jika user HANYA menyebutkan satu angka (misal "carikan yang 4M"), JANGAN HANYA MENGISI harga_max. Isi harga_min dan harga_max dengan range di sekitar angka tersebut (misal harga_min: 3.5M, harga_max: 4.5M). 
 JANGAN PERNAH memasukkan angka harga (seperti "4m", "850jt", "juta", "milyar") ke dalam "keyword". Angka harga HANYA boleh masuk ke "harga_min" atau "harga_max". Jika tidak ada kata kunci lain selain harga, isi "keyword" dengan null.
 
 Kembalikan HANYA JSON, tanpa penjelasan.`,
@@ -223,6 +222,10 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
   "harga_text": "teks harga asli dari template",
   "keterangan": "keterangan/catatan tambahan (carport, kitchen set, dll)",
   "photo_link": "link google drive atau link foto jika ada, atau string kosong",
+  "kondisi": "kondisi bangunan (Baru/Lama/N/A) dari teks, default N/A",
+  "jenis_properti": "jenis properti (Rumah/Ruko/Kavling/Gudang/Villa/Lainnya) dari teks, default Rumah",
+  "ketersediaan": "status pembangunan (Ready/Indent/N/A) dari teks, default N/A",
+  "tipe_transaksi": "tipe transaksi (Jual/Sewa/Jual/Sewa) dari teks, default Jual",
   "agent_name": "nama agent jika ada, atau string kosong"
 }
 

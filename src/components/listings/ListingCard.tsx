@@ -51,20 +51,46 @@ export function ListingCard({ listing }: ListingCardProps) {
                 <Building2 className="w-4.5 h-4.5 text-blue-600" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-semibold text-sm truncate">
+                <h3 className="font-semibold text-sm truncate flex items-center gap-1.5">
                   {listing.kawasan || "N/A"}
+                  {listing.tipe_transaksi && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {listing.tipe_transaksi}
+                    </Badge>
+                  )}
+                  {listing.jenis_properti && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-blue-50/50 text-blue-700 border-blue-200">
+                      {listing.jenis_properti}
+                    </Badge>
+                  )}
                 </h3>
                 {listing.alamat && (
-                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
                     <MapPin className="w-3 h-3 shrink-0" />
                     {listing.alamat}
                   </p>
                 )}
               </div>
             </div>
-            <Badge variant="outline" className={statusInfo.className}>
-              {statusInfo.label}
-            </Badge>
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
+              <Badge variant="outline" className={statusInfo.className}>
+                {statusInfo.label}
+              </Badge>
+              {(listing.kondisi || listing.ketersediaan) && (
+                <div className="flex items-center gap-1">
+                  {listing.kondisi && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">
+                      {listing.kondisi}
+                    </Badge>
+                  )}
+                  {listing.ketersediaan && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">
+                      {listing.ketersediaan}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Specs */}

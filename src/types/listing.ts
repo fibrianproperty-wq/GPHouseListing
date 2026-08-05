@@ -18,6 +18,10 @@ export interface Listing {
   harga_text: string | null;
   keterangan: string | null;
   photo_link?: string | null;
+  kondisi: string | null;
+  jenis_properti: string | null;
+  ketersediaan: string | null;
+  tipe_transaksi: string | null;
   agent_name: string;
   status: 'active' | 'sold' | 'inactive';
   source: 'web' | 'telegram';
@@ -42,6 +46,10 @@ export interface ListingFormData {
   harga_text: string;
   keterangan: string;
   photo_link: string;
+  kondisi: string;
+  jenis_properti: string;
+  ketersediaan: string;
+  tipe_transaksi: string;
   agent_name: string;
   status: 'active' | 'sold' | 'inactive';
 }
@@ -131,6 +139,10 @@ export interface ParsedListing {
   harga_text: string;
   keterangan: string;
   photo_link?: string | null;
+  kondisi: string | null;
+  jenis_properti: string | null;
+  ketersediaan: string | null;
+  tipe_transaksi: string | null;
   agent_name: string;
 }
 
