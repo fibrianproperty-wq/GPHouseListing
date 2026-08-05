@@ -4,6 +4,8 @@ import { Building2, CheckCircle, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { CopyListingButton } from "@/components/listings/CopyListingButton";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 

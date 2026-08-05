@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Listing, ListingFormData } from "@/types/listing";
 import { parseHargaText } from "@/lib/utils";
+import { parseListingWithGroq } from "@/actions/parseListing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -163,7 +164,6 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                     btn.disabled = true;
 
                     try {
-                      const { parseListingWithGroq } = await import("@/actions/parseListing");
                       const res = await parseListingWithGroq(text);
                       
                       if (res.success && res.data) {

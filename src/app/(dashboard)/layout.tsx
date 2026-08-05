@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardLayoutClient } from "@/components/layout/DashboardLayoutClient";
 import { checkAllowedUser } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({
   children,
 }: {
