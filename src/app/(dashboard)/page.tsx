@@ -77,24 +77,24 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {stats.map((stat) => (
           <Card
             key={stat.label}
-            className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-shadow duration-300"
+            className="relative overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300 bg-gradient-to-br from-card to-muted/20"
           >
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <CardContent className="p-3.5 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                <div className="order-2 sm:order-1">
+                  <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider line-clamp-1">
                     {stat.label}
                   </p>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                  <p className="text-2xl sm:text-3xl font-bold mt-0.5 sm:mt-1 leading-none">{stat.value}</p>
                 </div>
                 <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg ${stat.shadowColor}`}
+                  className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg ${stat.shadowColor} order-1 sm:order-2 shrink-0`}
                 >
-                  <stat.icon className="w-6 h-6 text-white" />
+                  <stat.icon className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
                 </div>
               </div>
             </CardContent>
