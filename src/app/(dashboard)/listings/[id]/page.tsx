@@ -16,6 +16,7 @@ import {
   Calendar,
   Edit,
   ArrowLeft,
+  ExternalLink,
 } from "lucide-react";
 import { DeleteListingButton } from "@/components/listings/DeleteListingButton";
 import { MarkAsSoldButton } from "@/components/listings/MarkAsSoldButton";
@@ -200,17 +201,37 @@ export default async function ListingDetailPage({
             </div>
           )}
 
-          {/* Keterangan */}
-          {listing.keterangan && (
+          {/* Keterangan & Photo */}
+          {(listing.keterangan || listing.photo_link) && (
             <>
               <Separator />
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Keterangan
-                </p>
-                <p className="text-sm leading-relaxed bg-muted/50 rounded-xl p-4">
-                  {listing.keterangan}
-                </p>
+              <div className="space-y-4">
+                {listing.photo_link && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                      Foto (Google Drive)
+                    </p>
+                    <a
+                      href={listing.photo_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Buka Album Foto
+                    </a>
+                  </div>
+                )}
+                {listing.keterangan && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                      Keterangan
+                    </p>
+                    <p className="text-sm leading-relaxed bg-muted/50 rounded-xl p-4 whitespace-pre-wrap">
+                      {listing.keterangan}
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}

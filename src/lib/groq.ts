@@ -173,6 +173,7 @@ Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
   "harga": angka_harga_rupiah,
   "harga_text": "teks harga asli dari template",
   "keterangan": "keterangan/catatan tambahan (carport, kitchen set, dll)",
+  "photo_link": "link google drive atau link foto jika ada, atau string kosong",
   "agent_name": "nama agent jika ada, atau string kosong"
 }
 

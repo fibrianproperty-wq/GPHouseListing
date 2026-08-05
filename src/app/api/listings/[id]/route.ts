@@ -77,6 +77,7 @@ export async function PUT(
       "harga",
       "harga_text",
       "keterangan",
+      "photo_link",
       "agent_name",
       "status",
     ];

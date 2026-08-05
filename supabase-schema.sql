@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS listings (
   harga BIGINT,            -- Harga dalam Rupiah (contoh: 850000000)
   harga_text TEXT,          -- Harga display (contoh: "850 Juta (Nego)")
   keterangan TEXT,          -- Keterangan tambahan
+  photo_link TEXT,
   agent_name TEXT NOT NULL, -- Nama agent (field manual)
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'sold', 'inactive')),
   source TEXT DEFAULT 'web' CHECK (source IN ('web', 'telegram')),
@@ -165,3 +166,9 @@ CREATE POLICY "Allowed users can view telegram whitelist"
 --     AND updated_at < (NOW() - INTERVAL '14 days');
 --   $$
 -- );
+
+-- ============================================================
+-- 9. Add photo_link column
+-- ============================================================
+-- Run this manually to add the new optional photo link column
+-- ALTER TABLE listings ADD COLUMN photo_link TEXT;

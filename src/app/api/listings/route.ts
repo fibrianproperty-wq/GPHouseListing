@@ -134,6 +134,7 @@ export async function POST(request: Request) {
       harga: body.harga ? Number(body.harga) : null,
       harga_text: body.harga_text || null,
       keterangan: body.keterangan || null,
+      photo_link: body.photo_link || null,
       agent_name: body.agent_name,
       status: body.status || "active",
       source: body.source || "web",

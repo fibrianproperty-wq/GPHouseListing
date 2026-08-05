@@ -188,6 +188,9 @@ export default function AIAssistantPage() {
                     <p><span className="text-muted-foreground inline-block w-20">Spesifikasi:</span> LT {msg.parsedData.lt || 0} / LB {msg.parsedData.lb || 0}</p>
                     <p><span className="text-muted-foreground inline-block w-20">Kamar:</span> {msg.parsedData.kt || 0} KT / {msg.parsedData.km || 0} KM</p>
                     <p><span className="text-muted-foreground inline-block w-20">Harga:</span> {msg.parsedData.harga_text || "Rp " + msg.parsedData.harga}</p>
+                    {msg.parsedData.photo_link && (
+                      <p><span className="text-muted-foreground inline-block w-20">Foto:</span> Terlampir</p>
+                    )}
                   </div>
                   
                   <div className="space-y-3">

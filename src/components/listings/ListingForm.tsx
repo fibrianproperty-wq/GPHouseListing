@@ -42,6 +42,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
     harga: listing?.harga || "",
     harga_text: listing?.harga_text || "",
     keterangan: listing?.keterangan || "",
+    photo_link: listing?.photo_link || "",
     agent_name: listing?.agent_name || "",
     status: listing?.status || "active",
   });
@@ -401,6 +402,18 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
       <Card>
         <CardContent className="p-5 space-y-4">
           <h3 className="font-semibold text-sm">📝 Keterangan & Status</h3>
+
+          <div>
+            <Label htmlFor="photo_link">Link Foto (Google Drive)</Label>
+            <Input
+              id="photo_link"
+              type="url"
+              placeholder="https://drive.google.com/..."
+              value={formData.photo_link}
+              onChange={(e) => updateField("photo_link", e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
 
           <div>
             <Label htmlFor="keterangan">Keterangan</Label>
