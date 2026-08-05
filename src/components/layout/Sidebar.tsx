@@ -8,6 +8,7 @@ import {
   List,
   Sparkles,
   X,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,11 @@ const navItems = [
     label: "Smart Search",
     href: "/smart-search",
     icon: Sparkles,
+  },
+  {
+    label: "User Management",
+    href: "/users",
+    icon: Users,
   },
 ];
 
