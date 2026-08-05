@@ -147,3 +147,21 @@ CREATE POLICY "Allowed users can view telegram whitelist"
 -- 7. Grant service_role full access (for Telegram bot operations)
 -- The service_role key already bypasses RLS by default in Supabase.
 -- No additional grants needed.
+
+-- ============================================================
+-- 8. Auto-delete Sold Listings via pg_cron (Optional Setup)
+-- ============================================================
+-- To automatically delete sold listings older than 14 days directly in the DB:
+-- Enable pg_cron extension (requires superuser access in Supabase Dashboard -> Database -> Extensions)
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule the job to run every day at midnight
+-- SELECT cron.schedule(
+--   'cleanup-sold-listings',
+--   '0 0 * * *',
+--   $$
+--     DELETE FROM listings
+--     WHERE status = 'sold'
+--     AND updated_at < (NOW() - INTERVAL '14 days');
+--   $$
+-- );

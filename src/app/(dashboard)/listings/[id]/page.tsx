@@ -55,6 +55,18 @@ export default async function ListingDetailPage({
 
   const statusInfo = statusVariants[listing.status] || statusVariants.active;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  let isAdmin = false;
+  if (user) {
+    const { data: allowedUser } = await supabase
+      .from("allowed_users")
+      .select("role")
+      .eq("email", user.email)
+      .single();
+    isAdmin = allowedUser?.role === "admin";
+  }
+  const isCreator = user && listing.created_by === user.email;
+  const canModify = isAdmin || isCreator;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -67,16 +79,20 @@ export default async function ListingDetailPage({
           </Button>
         </Link>
         <div className="flex items-center gap-2">
-          {listing.status === 'active' && (
+          {canModify && listing.status === 'active' && (
             <MarkAsSoldButton listingId={id} />
           )}
-          <Link href={`/listings/${id}/edit`}>
-            <Button variant="outline" className="gap-2">
-              <Edit className="w-4 h-4" />
-              <span className="hidden sm:inline">Edit</span>
-            </Button>
-          </Link>
-          <DeleteListingButton listingId={id} />
+          {canModify && (
+            <Link href={`/listings/${id}/edit`}>
+              <Button variant="outline" className="gap-2">
+                <Edit className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+            </Link>
+          )}
+          {canModify && (
+            <DeleteListingButton listingId={id} />
+          )}
         </div>
       </div>
 

@@ -41,6 +41,32 @@ export async function PUT(
     const body = await request.json();
 
     const updates: Record<string, unknown> = {};
+
+    // Check ownership
+    const { data: { user } } = await supabase.auth.getUser();
+    let isAdmin = false;
+    if (user) {
+      const { data: allowedUser } = await supabase
+        .from("allowed_users")
+        .select("role")
+        .eq("email", user.email)
+        .single();
+      isAdmin = allowedUser?.role === "admin";
+    }
+
+    const { data: existingListing, error: fetchError } = await supabase
+      .from("listings")
+      .select("created_by")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !existingListing) {
+      return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+    }
+
+    if (!isAdmin && existingListing.created_by !== user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
     const allowedFields = [
       "kawasan",
       "alamat",
@@ -98,6 +124,32 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = await createClient();
+
+    // Check ownership
+    const { data: { user } } = await supabase.auth.getUser();
+    let isAdmin = false;
+    if (user) {
+      const { data: allowedUser } = await supabase
+        .from("allowed_users")
+        .select("role")
+        .eq("email", user.email)
+        .single();
+      isAdmin = allowedUser?.role === "admin";
+    }
+
+    const { data: existingListing, error: fetchError } = await supabase
+      .from("listings")
+      .select("created_by")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !existingListing) {
+      return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+    }
+
+    if (!isAdmin && existingListing.created_by !== user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const { data, error } = await supabase
       .from("listings")
