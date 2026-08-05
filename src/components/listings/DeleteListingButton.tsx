@@ -52,8 +52,8 @@ export function DeleteListingButton({ listingId }: DeleteListingButtonProps) {
         <DialogHeader>
           <DialogTitle>Hapus Listing?</DialogTitle>
           <DialogDescription>
-            Listing akan dinonaktifkan (soft delete). Data tidak akan dihapus
-            permanen dan bisa dipulihkan nanti.
+            Tindakan ini akan menghapus listing secara permanen dari database.
+            Data yang sudah dihapus tidak dapat dipulihkan kembali.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

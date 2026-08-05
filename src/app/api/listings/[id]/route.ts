@@ -101,7 +101,7 @@ export async function DELETE(
 
     const { data, error } = await supabase
       .from("listings")
-      .update({ status: "inactive" })
+      .delete()
       .eq("id", id)
       .select()
       .single();
@@ -111,7 +111,7 @@ export async function DELETE(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data, message: "Listing deactivated" });
+    return NextResponse.json({ data, message: "Listing deleted permanently" });
   } catch (error) {
     console.error("Listing DELETE error:", error);
     return NextResponse.json(
