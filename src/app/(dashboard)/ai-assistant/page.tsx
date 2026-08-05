@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
+import { Send, Bot, User, Loader2, CheckCircle2, AlertCircle, Trash2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListingCard } from "@/components/listings/ListingCard";
 import type { Listing, ParsedListing } from "@/types/listing";
@@ -22,6 +22,7 @@ export default function AIAssistantPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [agentName, setAgentName] = useState(""); // For saving templates
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -51,6 +52,45 @@ export default function AIAssistantPage() {
       localStorage.setItem("ai-assistant-messages", JSON.stringify(messages));
     }
   }, [messages]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Browser Anda tidak mendukung fitur Voice Recognition (Gunakan Chrome/Edge terbaru).");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'id-ID';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -281,13 +321,24 @@ export default function AIAssistantPage() {
       {/* Input Area */}
       <div className="p-4 border-t border-border bg-muted/10">
         <form onSubmit={handleSubmit} className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={toggleListening}
+            className={`rounded-xl w-12 h-12 shrink-0 shadow-sm transition-all ${isListening ? 'bg-red-50 text-red-500 border-red-200 animate-pulse' : ''}`}
+            disabled={isLoading}
+            title={isListening ? "Mendengarkan..." : "Bicara (Voice to Text)"}
+          >
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </Button>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tanya sesuatu atau paste data listing..."
+            placeholder={isListening ? "Mendengarkan suara Anda..." : "Tanya sesuatu atau paste data listing..."}
             className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm"
-            disabled={isLoading}
+            disabled={isLoading || isListening}
           />
           <Button 
             type="submit" 
