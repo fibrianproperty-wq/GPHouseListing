@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Listing } from "@/types/listing";
 import { formatHargaSingkat, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,8 @@ const statusVariants: Record<string, { label: string; className: string }> = {
 };
 
 export function ListingTable({ listings }: ListingTableProps) {
+  const router = useRouter();
+
   if (listings.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -65,6 +68,7 @@ export function ListingTable({ listings }: ListingTableProps) {
               <TableRow
                 key={listing.id}
                 className="hover:bg-accent/50 cursor-pointer transition-colors"
+                onClick={() => router.push(`/listings/${listing.id}`)}
               >
                 <TableCell>
                   <Link
