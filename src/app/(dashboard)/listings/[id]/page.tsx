@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { DeleteListingButton } from "@/components/listings/DeleteListingButton";
 import { MarkAsSoldButton } from "@/components/listings/MarkAsSoldButton";
+import { CopyListingButton } from "@/components/listings/CopyListingButton";
 
 const statusVariants: Record<string, { label: string; className: string }> = {
   active: {
@@ -80,6 +81,7 @@ export default async function ListingDetailPage({
           </Button>
         </Link>
         <div className="flex items-center gap-2">
+          <CopyListingButton listing={listing} variant="secondary" />
           {canModify && listing.status === 'active' && (
             <MarkAsSoldButton listingId={id} />
           )}

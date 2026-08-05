@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Listing } from "@/types/listing";
 import { formatHargaSingkat, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { CopyListingButton } from "@/components/listings/CopyListingButton";
 import {
   Table,
   TableBody,
@@ -57,6 +58,7 @@ export function ListingTable({ listings }: ListingTableProps) {
             <TableHead className="font-semibold hidden lg:table-cell">Agent</TableHead>
             <TableHead className="font-semibold text-center">Status</TableHead>
             <TableHead className="font-semibold hidden lg:table-cell">Tanggal</TableHead>
+            <TableHead className="font-semibold text-center w-[100px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -102,6 +104,9 @@ export function ListingTable({ listings }: ListingTableProps) {
                 </TableCell>
                 <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                   {formatDate(listing.created_at)}
+                </TableCell>
+                <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                  <CopyListingButton listing={listing} variant="ghost" size="icon" showText={false} />
                 </TableCell>
               </TableRow>
             );

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, CheckCircle, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
+import { CopyListingButton } from "@/components/listings/CopyListingButton";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -166,16 +167,21 @@ export default async function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right shrink-0 ml-4">
-                    <p className="font-semibold text-sm">
-                      {listing.harga_text ||
-                        (listing.harga
-                          ? `Rp ${listing.harga.toLocaleString("id-ID")}`
-                          : "-")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {listing.agent_name}
-                    </p>
+                  <div className="flex items-center text-right shrink-0 ml-4 gap-3">
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {listing.harga_text ||
+                          (listing.harga
+                            ? `Rp ${listing.harga.toLocaleString("id-ID")}`
+                            : "-")}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {listing.agent_name}
+                      </p>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <CopyListingButton listing={listing} variant="ghost" size="icon" showText={false} />
+                    </div>
                   </div>
                 </Link>
               ))}
