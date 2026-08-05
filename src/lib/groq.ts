@@ -42,7 +42,12 @@ async function callGroq(
 /**
  * Detect user intent from a Telegram message
  */
-export async function detectIntent(message: string): Promise<BotIntent> {
+export async function detectIntent(message: string, messagesHistory: any[] = []): Promise<BotIntent | "template_parse_incomplete"> {
+  // Check if we are in the middle of a template_parse form
+  const lastAiMessage = [...messagesHistory].reverse().find(m => m.role === "ai");
+  if (lastAiMessage && lastAiMessage.intent === "template_parse_incomplete") {
+    return "template_parse_incomplete";
+  }
   // Quick pattern matching for commands
   if (message.startsWith("/start")) return "start";
   if (message.startsWith("/help")) return "help";
@@ -93,7 +98,7 @@ export async function generateConversationalResponse(
   intent: string,
   context?: any
 ): Promise<string> {
-  let systemPrompt = "Kamu adalah AI Assistant (Property Hub) yang ramah, sopan, dan hangat layaknya manusia biasa.";
+  let systemPrompt = "Kamu adalah HOMIS (Home Assistant) yang ramah, asisten properti cerdas yang membantu agen. Gunakan gaya bahasa asisten AI yang sopan.";
   
   if (intent === "search") {
     systemPrompt += `
@@ -195,13 +200,13 @@ Kembalikan HANYA JSON, tanpa penjelasan.`,
  * Parse a copy-pasted property listing template into structured data
  */
 export async function parseListingTemplate(
-  message: string
+  message: string,
+  previousData: Partial<ParsedListing> | null = null
 ): Promise<ParsedListing | null> {
   try {
     const text = await callGroq(
-      `Kamu adalah parser template listing properti Indonesia. Ekstrak data dari template/teks berikut.
-
-Teks:
+      `Kamu adalah HOMIS, parser data properti. Ekstrak data dari teks berikut.
+${previousData ? `\nPERHATIAN: Ini adalah kelanjutan dari data sebelumnya. Gabungkan data baru ini dengan data sebelumnya.\nData Sebelumnya:\n${JSON.stringify(previousData)}\n\nTeks Tambahan User:` : '\nTeks:'}
 """
 ${message}
 """

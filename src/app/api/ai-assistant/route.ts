@@ -5,7 +5,7 @@ import { detectIntent, parseSearchQuery, parseListingTemplate, generateConversat
 
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, messages = [] } = await request.json();
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const intent = await detectIntent(message);
+    const intent = await detectIntent(message, messages);
 
     if (intent === "search") {
       const searchParams = await parseSearchQuery(message);
@@ -76,25 +76,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ intent: "chat", reply });
     }
 
-    if (intent === "template_parse") {
-      const parsedData = await parseListingTemplate(message);
+    if (intent === "template_parse" || intent === "template_parse_incomplete") {
+      const lastAiMessage = [...messages].reverse().find((m: any) => m.role === "ai");
+      const previousParsedData = lastAiMessage?.parsedData || null;
+
+      const parsedData = await parseListingTemplate(message, previousParsedData);
+      
       if (!parsedData) {
         return NextResponse.json({
           intent: "error",
           reply: "Gagal memproses template. Pastikan format teks sudah benar."
         });
       }
+
+      // Check required fields
+      const isComplete = parsedData.kawasan && parsedData.harga && parsedData.lt && parsedData.kt;
+
+      if (!isComplete) {
+        const missing = [];
+        if (!parsedData.kawasan) missing.push("Kawasan");
+        if (!parsedData.harga) missing.push("Harga");
+        if (!parsedData.lt) missing.push("Luas Tanah");
+        if (!parsedData.kt) missing.push("Kamar Tidur");
+
+        return NextResponse.json({
+          intent: "template_parse_incomplete",
+          parsedData,
+          reply: `Tolong lengkapi informasi yang masih kosong: ${missing.join(", ")}.\nSemakin lengkap informasinya, semakin pintar saya mencari dan menyimpannya.`
+        });
+      }
+
       return NextResponse.json({
         intent: "template_parse",
         parsedData,
-        reply: "Saya telah mendeteksi data listing dari pesan Anda. Silakan konfirmasi untuk menyimpannya ke database:"
+        reply: "Data sudah lengkap! Silakan konfirmasi untuk menyimpannya ke database:"
       });
     }
 
     if (intent === "help" || intent === "start") {
       return NextResponse.json({
         intent: "help",
-        reply: "Halo! Saya adalah AI Assistant Property Hub. Anda bisa mencari properti (misal: 'Cari rumah 3 KT di BSD di bawah 2 M') atau langsung mem-paste template data rumah untuk saya simpan."
+        reply: "Halo! Saya adalah HOMIS (Home Assistant). Anda bisa mencari properti (misal: 'Cari rumah 3 KT di BSD di bawah 2 M') atau langsung mem-paste spesifikasi data rumah untuk saya simpan."
       });
     }
 

@@ -40,7 +40,7 @@ export default function AIAssistantPage() {
       setMessages([{
         id: "welcome",
         role: "ai",
-        content: "Halo! Saya adalah AI Assistant. Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste template data rumah untuk saya simpan."
+        content: "Halo! Saya adalah HOMIS (Home Assistant). Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste spesifikasi rumah untuk saya simpan."
       }]);
     }
   }, []);
@@ -70,7 +70,7 @@ export default function AIAssistantPage() {
       const res = await fetch("/api/ai-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg }),
+        body: JSON.stringify({ message: userMsg, messages: newMessages }),
       });
       
       const data = await res.json();
@@ -144,7 +144,7 @@ export default function AIAssistantPage() {
       const initialMessage: Message = {
         id: "welcome",
         role: "ai",
-        content: "Halo! Saya adalah AI Assistant. Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste template data rumah untuk saya simpan."
+        content: "Halo! Saya adalah HOMIS (Home Assistant). Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste spesifikasi rumah untuk saya simpan."
       };
       setMessages([initialMessage]);
       localStorage.setItem("ai-assistant-messages", JSON.stringify([initialMessage]));
@@ -160,9 +160,14 @@ export default function AIAssistantPage() {
             <Bot className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-semibold">AI Assistant</h2>
-            <p className="text-xs text-muted-foreground">Pencarian cerdas & input data otomatis</p>
-          </div>
+          <h2 className="font-semibold flex items-center gap-2">
+            HOMIS 
+            <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-md font-medium tracking-wide">
+              BETA
+            </span>
+          </h2>
+          <p className="text-xs text-muted-foreground">Asisten Pencarian & Input Cerdas</p>
+        </div>
         </div>
         <Button 
           variant="ghost" 
