@@ -181,7 +181,7 @@ export default async function DashboardPage() {
                         {listing.agent_name}
                       </p>
                     </div>
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div className="shrink-0">
                       <CopyListingButton listing={listing} variant="ghost" size="icon" showText={false} />
                     </div>
                   </div>
