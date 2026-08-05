@@ -68,8 +68,8 @@ export async function detectIntent(message: string): Promise<BotIntent> {
     `Kamu adalah classifier intent untuk bot pencarian properti/rumah di Indonesia.
 
 Klasifikasikan pesan berikut ke salah satu intent:
-- "search" = user ingin mencari/bertanya tentang stok properti
-- "template_parse" = user menempelkan data listing properti untuk disimpan
+- "search" = user ingin mencari, bertanya, atau ngobrol santai tentang stok/harga properti.
+- "template_parse" = HANYA JIKA user menempelkan (copy-paste) BANYAK data/spesifikasi rumah yang terstruktur (ada info luas tanah, kamar, harga). Pesan pendek BUKAN template_parse.
 - "help" = user butuh bantuan / tidak jelas
 
 Pesan: "${message}"
@@ -116,6 +116,10 @@ Contoh konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
 - "di bawah 1 M" = harga_max: 1000000000
 - "800jt-an" = harga_min: 750000000, harga_max: 850000000
 - "kisaran 500-700 juta" = harga_min: 500000000, harga_max: 700000000
+- "harga 4m" = harga_max: 4000000000 (asumsi batas atas)
+
+ATURAN SANGAT PENTING:
+JANGAN PERNAH memasukkan angka harga (seperti "4m", "850jt", "juta", "milyar") ke dalam "keyword". Angka harga HANYA boleh masuk ke "harga_min" atau "harga_max". Jika tidak ada kata kunci lain selain harga, isi "keyword" dengan null.
 
 Kembalikan HANYA JSON, tanpa penjelasan.`,
       { jsonMode: true }
