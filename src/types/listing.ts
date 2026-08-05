@@ -146,4 +146,4 @@ export interface SearchParams {
   keyword: string | null;
 }
 
-export type BotIntent = 'search' | 'template_parse' | 'confirm_save' | 'cancel_save' | 'help' | 'start';
+export type BotIntent = 'search' | 'template_parse' | 'confirm_save' | 'cancel_save' | 'help' | 'start' | 'chat';

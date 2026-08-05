@@ -70,18 +70,63 @@ export async function detectIntent(message: string): Promise<BotIntent> {
 Klasifikasikan pesan berikut ke salah satu intent:
 - "search" = user ingin mencari, bertanya, atau ngobrol santai tentang stok/harga properti.
 - "template_parse" = HANYA JIKA user menempelkan (copy-paste) BANYAK data/spesifikasi rumah yang terstruktur (ada info luas tanah, kamar, harga). Pesan pendek BUKAN template_parse.
-- "help" = user butuh bantuan / tidak jelas
+- "help" = user butuh bantuan / panduan cara pakai.
+- "chat" = obrolan santai, basa-basi, atau pertanyaan umum di luar konteks properti (misal: "Halo", "Kamu siapa?", "Gimana kabarmu?").
 
 Pesan: "${message}"
 
-Jawab HANYA dengan satu kata: search, template_parse, atau help`
+Jawab HANYA dengan satu kata: search, template_parse, help, atau chat`
   );
 
   const intent = text.trim().toLowerCase();
-  if (intent === "search" || intent === "template_parse" || intent === "help") {
+  if (intent === "search" || intent === "template_parse" || intent === "help" || intent === "chat") {
     return intent as BotIntent;
   }
   return "search"; // default to search
+}
+
+/**
+ * Generate a conversational response based on context
+ */
+export async function generateConversationalResponse(
+  message: string,
+  intent: string,
+  context?: any
+): Promise<string> {
+  let systemPrompt = "Kamu adalah AI Assistant (Property Hub) yang ramah, sopan, dan hangat layaknya manusia biasa.";
+  
+  if (intent === "search") {
+    systemPrompt += `
+Tugasmu merespons hasil pencarian properti.
+Pesan user: "${message}"
+Jumlah properti yang ditemukan dari database: ${context?.count || 0}.
+
+Jika jumlah > 0: Berikan respons gembira bahwa kamu menemukan propertinya. Beritahu jumlahnya. Jangan berikan detail spesifikasi (karena akan ditampilkan otomatis dalam bentuk card). Cukup antarkan dengan ramah.
+Jika jumlah = 0: Minta maaf dengan ramah bahwa kriteria yang dicari belum tersedia, dan tawarkan untuk mencoba kata kunci lain.
+Jawablah dengan singkat, hangat, dan berbahasa Indonesia yang kasual namun sopan.`;
+  } else if (intent === "chat") {
+    systemPrompt += `
+User mengajak ngobrol santai atau bertanya di luar properti. 
+Pesan user: "${message}"
+
+Berikan respons layaknya asisten virtual yang ramah, lucu, dan cerdas. Ingatkan dengan halus bahwa keahlian utamamu adalah membantu mencari dan mengelola listing properti jika percakapan terlalu jauh.`;
+  } else if (intent === "help") {
+    systemPrompt += `
+User kebingungan atau meminta bantuan.
+Pesan user: "${message}"
+
+Jelaskan dengan ramah bahwa kamu bisa:
+1. Membantu mencari properti (contoh: "Cari rumah 3 kamar di BSD harga di bawah 2M").
+2. Membantu memasukkan data listing baru otomatis hanya dengan mem-paste teks spesifikasi rumah.`;
+  }
+
+  try {
+    const text = await callGroq(systemPrompt);
+    return text.trim();
+  } catch (error) {
+    console.error("Failed to generate conversational response:", error);
+    return "Tentu, mari kita lihat hasilnya.";
+  }
 }
 
 /**

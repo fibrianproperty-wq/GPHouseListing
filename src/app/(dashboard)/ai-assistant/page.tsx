@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Send, Bot, User, Loader2, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListingCard } from "@/components/listings/ListingCard";
 import type { Listing, ParsedListing } from "@/types/listing";
@@ -18,13 +18,7 @@ type Message = {
 };
 
 export default function AIAssistantPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "ai",
-      content: "Halo! Saya adalah AI Assistant. Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste template data rumah untuk saya simpan."
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [agentName, setAgentName] = useState(""); // For saving templates
@@ -35,7 +29,27 @@ export default function AIAssistantPage() {
   };
 
   useEffect(() => {
+    const saved = localStorage.getItem("ai-assistant-messages");
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse saved messages");
+      }
+    } else {
+      setMessages([{
+        id: "welcome",
+        role: "ai",
+        content: "Halo! Saya adalah AI Assistant. Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste template data rumah untuk saya simpan."
+      }]);
+    }
+  }, []);
+
+  useEffect(() => {
     scrollToBottom();
+    if (messages.length > 0) {
+      localStorage.setItem("ai-assistant-messages", JSON.stringify(messages));
+    }
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,17 +139,40 @@ export default function AIAssistantPage() {
     }
   };
 
+  const clearChat = () => {
+    if (confirm("Apakah Anda yakin ingin menghapus semua riwayat percakapan?")) {
+      const initialMessage: Message = {
+        id: "welcome",
+        role: "ai",
+        content: "Halo! Saya adalah AI Assistant. Anda bisa mencari properti (misal: 'Cari rumah di BSD harga 1 M') atau langsung mem-paste template data rumah untuk saya simpan."
+      };
+      setMessages([initialMessage]);
+      localStorage.setItem("ai-assistant-messages", JSON.stringify([initialMessage]));
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] bg-card border border-border rounded-xl overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg text-primary">
-          <Bot className="w-5 h-5" />
+      <div className="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <Bot className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="font-semibold">AI Assistant</h2>
+            <p className="text-xs text-muted-foreground">Pencarian cerdas & input data otomatis</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-semibold">AI Assistant</h2>
-          <p className="text-xs text-muted-foreground">Pencarian cerdas & input data otomatis</p>
-        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={clearChat} 
+          title="Hapus riwayat obrolan"
+          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Chat History */}

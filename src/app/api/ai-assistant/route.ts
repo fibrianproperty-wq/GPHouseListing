@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { detectIntent, parseSearchQuery, parseListingTemplate } from "@/lib/groq";
+import { detectIntent, parseSearchQuery, parseListingTemplate, generateConversationalResponse } from "@/lib/groq";
 
 export async function POST(request: Request) {
   try {
@@ -58,14 +58,19 @@ export async function POST(request: Request) {
       const { data: listings, error } = await query;
       if (error) throw error;
 
+      const reply = await generateConversationalResponse(message, "search", { count: listings?.length || 0 });
+
       return NextResponse.json({
         intent: "search",
         searchParams,
         listings: listings || [],
-        reply: listings && listings.length > 0 
-          ? `Saya menemukan ${listings.length} properti yang cocok dengan pencarian Anda:`
-          : "Maaf, saya tidak dapat menemukan properti yang cocok dengan kriteria tersebut."
+        reply
       });
+    }
+
+    if (intent === "chat") {
+      const reply = await generateConversationalResponse(message, "chat");
+      return NextResponse.json({ intent: "chat", reply });
     }
 
     if (intent === "template_parse") {
