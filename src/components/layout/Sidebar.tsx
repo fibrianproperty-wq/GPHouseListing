@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
   LayoutDashboard,
   List,
-  Sparkles,
+  Bot,
   X,
   Users,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,9 @@ const navItems = [
     icon: List,
   },
   {
-    label: "Smart Search",
-    href: "/smart-search",
-    icon: Sparkles,
+    label: "AI Assistant",
+    href: "/ai-assistant",
+    icon: Bot,
   },
   {
     label: "User Management",
@@ -43,6 +44,17 @@ const navItems = [
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/signout', { method: 'POST' });
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
 
   return (
     <>
@@ -112,10 +124,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="px-4 py-4 border-t border-border">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>System Online</span>
-          </div>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4.5 h-4.5" />
+            <span className="text-sm font-medium">Logout</span>
+          </Button>
         </div>
       </aside>
     </>
