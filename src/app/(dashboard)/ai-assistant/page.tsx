@@ -219,15 +219,18 @@ export default function AIAssistantPage() {
         body: JSON.stringify(listingData),
       });
 
-      if (!res.ok) throw new Error("Failed to save listing");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to save listing");
+      }
       
       const { data } = await res.json();
 
       setMessages(prev => prev.map(m => 
         m.id === messageId ? { ...m, status: "saved", content: "✅ Listing berhasil disimpan!", listings: [data] } : m
       ));
-    } catch (error) {
-      alert("Gagal menyimpan listing");
+    } catch (error: any) {
+      alert("Gagal menyimpan listing: " + error.message);
       setMessages(prev => prev.map(m => 
         m.id === messageId ? { ...m, status: "error" } : m
       ));
