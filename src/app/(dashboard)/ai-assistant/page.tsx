@@ -21,7 +21,6 @@ export default function AIAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [agentName, setAgentName] = useState(""); // For saving templates
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -166,10 +165,6 @@ export default function AIAssistantPage() {
       
       if (!res.ok) throw new Error(data.error || "Failed to process request");
 
-      if (data.parsedData?.agent_name) {
-        setAgentName(data.parsedData.agent_name);
-      }
-
       setMessages((prev) => [
         ...prev,
         {
@@ -196,8 +191,20 @@ export default function AIAssistantPage() {
     }
   };
 
+  const handleFieldChange = (messageId: string, field: keyof ParsedListing, value: any) => {
+    setMessages(prev => prev.map(m => {
+      if (m.id === messageId && m.parsedData) {
+        return {
+          ...m,
+          parsedData: { ...m.parsedData, [field]: value }
+        };
+      }
+      return m;
+    }));
+  };
+
   const handleSaveListing = async (messageId: string, parsedData: ParsedListing) => {
-    if (!agentName.trim()) {
+    if (!parsedData.agent_name?.trim()) {
       alert("Mohon isi Nama Agent sebelum menyimpan.");
       return;
     }
@@ -209,7 +216,6 @@ export default function AIAssistantPage() {
     try {
       const listingData = {
         ...parsedData,
-        agent_name: agentName,
         source: "web"
       };
 
@@ -328,33 +334,51 @@ export default function AIAssistantPage() {
 
               {/* Special UI for Template Parse (Confirmation) */}
               {msg.intent === "template_parse" && msg.parsedData && msg.status !== "saved" && (
-                <div className="mt-2 bg-background border border-border rounded-xl p-4 shadow-sm w-full max-w-md animate-in fade-in slide-in-from-top-2">
+                  <div className="mt-2 bg-background border border-border rounded-xl p-4 shadow-sm w-full max-w-md animate-in fade-in slide-in-from-top-2">
                   <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    Data terdeteksi:
+                    Data terdeteksi (Bisa diedit):
                   </h4>
-                  <div className="space-y-1 text-sm mb-4 bg-muted/50 p-3 rounded-lg">
-                    <p><span className="text-muted-foreground inline-block w-20">Kawasan:</span> {msg.parsedData.kawasan || "-"}</p>
-                    <p><span className="text-muted-foreground inline-block w-20">Alamat:</span> {msg.parsedData.alamat || "-"}</p>
-                    <p><span className="text-muted-foreground inline-block w-20">Spesifikasi:</span> LT {msg.parsedData.lt || 0} / LB {msg.parsedData.lb || 0}</p>
-                    <p><span className="text-muted-foreground inline-block w-20">Kamar:</span> {msg.parsedData.kt || 0} KT / {msg.parsedData.km || 0} KM</p>
-                    <p><span className="text-muted-foreground inline-block w-20">Harga:</span> {msg.parsedData.harga_text || "Rp " + msg.parsedData.harga}</p>
-                    {msg.parsedData.photo_link && (
-                      <p><span className="text-muted-foreground inline-block w-20">Foto:</span> Terlampir</p>
-                    )}
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-4 bg-muted/30 p-3 rounded-lg max-h-[350px] overflow-y-auto">
+                    {[
+                      { key: 'jenis_properti', label: 'Jenis Properti' },
+                      { key: 'tipe_transaksi', label: 'Tipe Transaksi' },
+                      { key: 'kawasan', label: 'Kawasan' },
+                      { key: 'alamat', label: 'Alamat' },
+                      { key: 'lt', label: 'Luas Tanah (LT)' },
+                      { key: 'lb', label: 'Luas Bangunan (LB)' },
+                      { key: 'kt', label: 'Kamar Tidur (KT)' },
+                      { key: 'km', label: 'Kamar Mandi (KM)' },
+                      { key: 'lantai', label: 'Lantai' },
+                      { key: 'hadap', label: 'Hadap' },
+                      { key: 'kondisi', label: 'Kondisi' },
+                      { key: 'sertifikat', label: 'Sertifikat' },
+                      { key: 'furnished', label: 'Furnished' },
+                      { key: 'ketersediaan', label: 'Ketersediaan' },
+                      { key: 'harga', label: 'Harga (Angka)' },
+                      { key: 'harga_text', label: 'Harga (Teks)' },
+                      { key: 'agent_name', label: 'Nama Agent' },
+                      { key: 'photo_link', label: 'Link Foto' },
+                      { key: 'keterangan', label: 'Keterangan Tambahan', colSpan: 2 }
+                    ].map(({ key, label, colSpan }) => (
+                      <div key={key} className={`flex flex-col gap-1 ${colSpan === 2 ? 'col-span-2' : 'col-span-1'}`}>
+                        <label className="text-[10px] text-muted-foreground uppercase font-semibold">{label}</label>
+                        <input 
+                          type={['lt', 'lb', 'kt', 'km', 'lantai', 'harga'].includes(key) ? "number" : "text"}
+                          value={msg.parsedData![key as keyof ParsedListing] ?? ""}
+                          onChange={(e) => {
+                            const isNumber = e.target.type === 'number';
+                            const val = isNumber ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value;
+                            handleFieldChange(msg.id, key as keyof ParsedListing, val);
+                          }}
+                          placeholder="-"
+                          className="w-full text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        />
+                      </div>
+                    ))}
                   </div>
                   
                   <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground mb-1 block">Nama Agent</label>
-                      <input
-                        type="text"
-                        value={agentName}
-                        onChange={(e) => setAgentName(e.target.value)}
-                        placeholder="Masukkan nama agent..."
-                        className="w-full text-sm px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      />
-                    </div>
                     <Button 
                       onClick={() => handleSaveListing(msg.id, msg.parsedData!)} 
                       className="w-full"
