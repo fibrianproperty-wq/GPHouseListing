@@ -127,8 +127,8 @@ export async function POST(request: Request) {
     const listing = {
       kawasan: body.kawasan || null,
       alamat: body.alamat || null,
-      lt: body.lt !== null && body.lt !== undefined ? Math.round(Number(body.lt)) : null,
-      lb: body.lb !== null && body.lb !== undefined ? Math.round(Number(body.lb)) : null,
+      lt: body.lt !== null && body.lt !== undefined ? Number(body.lt) : null,
+      lb: body.lb !== null && body.lb !== undefined ? Number(body.lb) : null,
       kt: body.kt !== null && body.kt !== undefined ? Math.round(Number(body.kt)) : null,
       km: body.km !== null && body.km !== undefined ? Math.round(Number(body.km)) : null,
       harga: body.harga !== null && body.harga !== undefined ? Math.round(Number(body.harga)) : null,
