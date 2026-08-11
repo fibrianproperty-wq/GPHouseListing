@@ -256,8 +256,8 @@ ${previousData ? `PERHATIAN: Gabungkan data baru ini dengan data sebelumnya.\nDa
 Aturan konversi:
 - M = Milyar = 1.000.000.000, Jt = Juta = 1.000.000
 - Jika disebutkan "kamar mandi setiap lantai", asumsikan jumlah kamar mandi sama dengan jumlah lantai (jika lantai disebutkan).
-- Jika spesifikasi menyatakan 0 (misalnya 0 Kamar Tidur), isi dengan angka 0, bukan null.
-- Jika jenis properti adalah Apartemen/Apartment, maka ukuran "Luas" yang disebutkan adalah Luas Bangunan (lb), biarkan Luas Tanah (lt) null.
+- Jika spesifikasi mencantumkan angka 0 (misalnya 0 Kamar Tidur), maka isi dengan angka 0. Jangan dikosongkan.
+- Jika jenis properti adalah Apartemen atau Apartment, maka ukuran "Luas" yang disebutkan adalah Luas Bangunan (lb). Kosongkan Luas Tanah (lt).
 
 Contoh 1:
 Teks: "Dijual Rumah di BSD. LT 100 / LB 80. KT 3+1 KM 2. Harga 1.5 M Nego. SHM. Hub: Budi 08123"
