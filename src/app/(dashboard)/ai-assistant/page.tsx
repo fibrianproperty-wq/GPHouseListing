@@ -216,9 +216,11 @@ export default function AIAssistantPage() {
       });
 
       if (!res.ok) throw new Error("Failed to save listing");
+      
+      const { data } = await res.json();
 
       setMessages(prev => prev.map(m => 
-        m.id === messageId ? { ...m, status: "saved", content: "✅ Listing berhasil disimpan!" } : m
+        m.id === messageId ? { ...m, status: "saved", content: "✅ Listing berhasil disimpan!", listings: [data] } : m
       ));
     } catch (error) {
       alert("Gagal menyimpan listing");
@@ -297,6 +299,17 @@ export default function AIAssistantPage() {
 
               {/* Special UI for Search Results */}
               {msg.intent === "search" && msg.listings && msg.listings.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 w-full max-w-2xl">
+                  {msg.listings.map(listing => (
+                    <div key={listing.id} className="scale-95 origin-top-left w-[105%]">
+                      <ListingCard listing={listing} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Special UI for Saved Listing */}
+              {msg.intent === "template_parse" && msg.status === "saved" && msg.listings && msg.listings.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 w-full max-w-2xl">
                   {msg.listings.map(listing => (
                     <div key={listing.id} className="scale-95 origin-top-left w-[105%]">

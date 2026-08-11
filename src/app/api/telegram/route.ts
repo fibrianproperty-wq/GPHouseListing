@@ -134,6 +134,12 @@ async function handleSearch(chatId: number, text: string) {
     if (searchParams.km_min) {
       query = query.gte("km", searchParams.km_min);
     }
+    if (searchParams.jenis_properti) {
+      query = query.ilike("jenis_properti", `%${searchParams.jenis_properti}%`);
+    }
+    if (searchParams.keyword) {
+      query = query.or(`kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
+    }
 
     const { data: listings, error } = await query;
 
@@ -150,6 +156,7 @@ async function handleSearch(chatId: number, text: string) {
       if (searchParams.harga_max) noResultMsg += `• Harga max: Rp ${searchParams.harga_max.toLocaleString("id-ID")}\n`;
       if (searchParams.kt_min) noResultMsg += `• Min KT: ${searchParams.kt_min}\n`;
       if (searchParams.km_min) noResultMsg += `• Min KM: ${searchParams.km_min}\n`;
+      if (searchParams.jenis_properti) noResultMsg += `• Jenis Properti: ${searchParams.jenis_properti}\n`;
       noResultMsg += "\nCoba perluas pencarian atau gunakan kata kunci berbeda.";
       await sendMessage(chatId, noResultMsg);
       return;

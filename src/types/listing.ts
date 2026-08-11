@@ -155,6 +155,7 @@ export interface SearchParams {
   hadap?: string | null;
   lt_min?: number | null;
   lb_min?: number | null;
+  jenis_properti?: string | null;
   keyword: string | null;
 }
 

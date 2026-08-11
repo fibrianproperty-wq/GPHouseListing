@@ -52,6 +52,10 @@ export async function detectIntent(message: string, messagesHistory: any[] = [])
   if (message.startsWith("/start")) return "start";
   if (message.startsWith("/help")) return "help";
 
+  // Check for explicit WTS/WTB/WTR acronyms
+  if (/^\s*(wts|dijual|disewa(?:kan)?)\b/i.test(message)) return "template_parse";
+  if (/^\s*(wtb|wtr|dicari)\b/i.test(message)) return "search";
+
   // Check for template-like patterns (multiple fields with labels)
   const templatePatterns = [
     /kawasan|cluster/i,
@@ -73,10 +77,10 @@ export async function detectIntent(message: string, messagesHistory: any[] = [])
     `Kamu adalah classifier intent untuk bot pencarian properti/rumah di Indonesia.
 
 Klasifikasikan pesan berikut ke salah satu intent:
-- "search" = user ingin mencari, bertanya, atau ngobrol santai tentang stok/harga properti.
-- "template_parse" = HANYA JIKA user menempelkan (copy-paste) BANYAK data/spesifikasi rumah yang terstruktur (ada info luas tanah, kamar, harga). Pesan pendek BUKAN template_parse.
+- "search" = user ingin mencari rumah (ciri-ciri: pakai kata WTB, WTR, DICARI, atau kalimat tanya).
+- "template_parse" = user ingin menginput/memasukkan data listing baru ke database (ciri-ciri: pakai kata WTS, DIJUAL, DISEWA, DISEWAKAN, atau mem-paste spesifikasi detail rumah).
 - "help" = user butuh bantuan / panduan cara pakai.
-- "chat" = obrolan santai, basa-basi, atau pertanyaan umum di luar konteks properti (misal: "Halo", "Kamu siapa?", "Gimana kabarmu?").
+- "chat" = obrolan santai, basa-basi, atau pertanyaan umum di luar konteks properti (misal: "Halo", "Kamu siapa?").
 
 Pesan: "${message}"
 
@@ -141,57 +145,97 @@ export async function parseSearchQuery(
   message: string
 ): Promise<SearchParams> {
   try {
-    const text = await callGroq(
-      `Kamu adalah parser pencarian properti Indonesia. Ekstrak parameter pencarian dari pesan berikut.
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error("API Key missing");
 
-Pesan: "${message}"
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `Kamu adalah asisten pencarian properti cerdas di Indonesia. Ekstrak parameter dari pesan user.
+PENTING: "M" = Milyar (×1.000.000.000), "jt" = Juta (×1.000.000).
 
-Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
-{
-  "kawasan": "nama kawasan/cluster atau null",
-  "harga_min": angka_rupiah_atau_null,
-  "harga_max": angka_rupiah_atau_null,
-  "kt_min": angka_atau_null,
-  "km_min": angka_atau_null,
-  "hadap": "arah hadap rumah (Utara/Selatan/Timur/Barat/dll) atau null",
-  "lt_min": angka_luas_tanah_m2_atau_null,
-  "lb_min": angka_luas_bangunan_m2_atau_null,
-  "keyword": "keyword_pencarian_lain_atau_null"
-}
+Contoh 1:
+User: "Cari rumah di BSD 4M"
+Parameter: harga_min: 3500000000, harga_max: 4500000000, kawasan: "BSD", jenis_properti: "Rumah"
 
-Contoh konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
-- "1 M" atau "1 Miliar" = harga_min: 800000000, harga_max: 1200000000 (beri range toleransi +-20% jika menyebut angka spesifik tanpa batas)
-- "4M" = harga_min: 3500000000, harga_max: 4500000000 (beri range toleransi +- 500juta)
-- "di bawah 1 M" = harga_max: 1000000000, harga_min: null
-- "800jt-an" = harga_min: 750000000, harga_max: 850000000
-- "kisaran 500-700 juta" = harga_min: 500000000, harga_max: 700000000
+Contoh 2:
+User: "LT 100 harga di bawah 1 M"
+Parameter: lt_min: 100, harga_max: 1000000000, harga_min: null
 
-ATURAN SANGAT PENTING:
-Jika user HANYA menyebutkan satu angka (misal "carikan yang 4M"), JANGAN HANYA MENGISI harga_max. Isi harga_min dan harga_max dengan range di sekitar angka tersebut (misal harga_min: 3.5M, harga_max: 4.5M). 
-JANGAN PERNAH memasukkan angka harga (seperti "4m", "850jt", "juta", "milyar") ke dalam "keyword". Angka harga HANYA boleh masuk ke "harga_min" atau "harga_max". Jika tidak ada kata kunci lain selain harga, isi "keyword" dengan null.
+Contoh 3:
+User: "800jt-an di Bintaro 3 kamar"
+Parameter: harga_min: 750000000, harga_max: 850000000, kawasan: "Bintaro", kt_min: 3
 
-Kembalikan HANYA JSON, tanpa penjelasan.`,
-      { jsonMode: true }
-    );
+Contoh 4 (Rentang angka gaul):
+User: "Mau cari ruko 2Man"
+Parameter: harga_min: 2000000000, harga_max: 2999999999, jenis_properti: "Ruko"`
+          },
+          { role: "user", content: message }
+        ],
+        temperature: 0.1,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "extract_search_params",
+              description: "Extract structured property search parameters from user message.",
+              parameters: {
+                type: "object",
+                properties: {
+                  kawasan: { type: "string", description: "Nama kawasan, lokasi, atau cluster (contoh: BSD, Bintaro). Null jika tidak ada." },
+                  harga_min: { type: "number", description: "Harga minimum dalam Rupiah (angka penuh). Null jika tidak ada." },
+                  harga_max: { type: "number", description: "Harga maksimum dalam Rupiah (angka penuh). Null jika tidak ada." },
+                  kt_min: { type: "number", description: "Minimal jumlah kamar tidur. Null jika tidak ada." },
+                  km_min: { type: "number", description: "Minimal jumlah kamar mandi. Null jika tidak ada." },
+                  hadap: { type: "string", description: "Arah hadap (Utara/Selatan/Timur/Barat). Null jika tidak ada." },
+                  lt_min: { type: "number", description: "Minimal luas tanah (m2). Null jika tidak ada." },
+                  lb_min: { type: "number", description: "Minimal luas bangunan (m2). Null jika tidak ada." },
+                  jenis_properti: { type: "string", description: "Jenis properti (Rumah, Ruko, Gudang, Tanah, dll). Null jika tidak disebutkan spesifik." },
+                  keyword: { type: "string", description: "Kata kunci lain selain parameter di atas. Jangan masukkan angka harga/ukuran di sini. Null jika tidak ada." }
+                }
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "extract_search_params" } }
+      }),
+    });
 
-    const jsonStr = text
-      .trim()
-      .replace(/```(?:json)?\n?/g, "")
-      .replace(/\n?```/g, "")
-      .trim();
-    return JSON.parse(jsonStr) as SearchParams;
+    if (!response.ok) throw new Error("Groq API Error");
+
+    const data = await response.json();
+    const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+    
+    if (toolCall && toolCall.function.name === "extract_search_params") {
+      const args = JSON.parse(toolCall.function.arguments);
+      return {
+        kawasan: args.kawasan || null,
+        harga_min: args.harga_min || null,
+        harga_max: args.harga_max || null,
+        kt_min: args.kt_min || null,
+        km_min: args.km_min || null,
+        hadap: args.hadap || null,
+        lt_min: args.lt_min || null,
+        lb_min: args.lb_min || null,
+        jenis_properti: args.jenis_properti || null,
+        keyword: args.keyword || null,
+      } as SearchParams;
+    }
+    
+    throw new Error("No tool call returned");
   } catch (error) {
     console.error("Failed to parse search query:", error);
     return {
-      kawasan: null,
-      harga_min: null,
-      harga_max: null,
-      kt_min: null,
-      km_min: null,
-      hadap: null,
-      lt_min: null,
-      lb_min: null,
-      keyword: message,
+      kawasan: null, harga_min: null, harga_max: null, kt_min: null, km_min: null, 
+      hadap: null, lt_min: null, lb_min: null, jenis_properti: null, keyword: message,
     };
   }
 }
@@ -204,53 +248,107 @@ export async function parseListingTemplate(
   previousData: Partial<ParsedListing> | null = null
 ): Promise<ParsedListing | null> {
   try {
-    const text = await callGroq(
-      `Kamu adalah HOMIS, parser data properti. Ekstrak data dari teks berikut.
-${previousData ? `\nPERHATIAN: Ini adalah kelanjutan dari data sebelumnya. Gabungkan data baru ini dengan data sebelumnya.\nData Sebelumnya:\n${JSON.stringify(previousData)}\n\nTeks Tambahan User:` : '\nTeks:'}
-"""
-${message}
-"""
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) throw new Error("API Key missing");
 
-Kembalikan HANYA JSON object (tanpa markdown code block) dengan format:
-{
-  "kawasan": "nama kawasan/cluster",
-  "alamat": "alamat lengkap",
-  "lt": angka_luas_tanah_m2_atau_null,
-  "lb": angka_luas_bangunan_m2_atau_null,
-  "kt": angka_kamar_tidur_atau_null,
-  "km": angka_kamar_mandi_atau_null,
-  "hadap": "arah hadap rumah (Utara/Selatan/Timur/Barat/dll) atau string kosong",
-  "lantai": angka_jumlah_lantai_atau_null,
-  "sertifikat": "jenis sertifikat (SHM/SHGB/AJB/Strata Title/dll) atau string kosong",
-  "furnished": "status furnished (Furnished/Semi-Furnished/Unfurnished) atau string kosong",
-  "harga": angka_harga_rupiah,
-  "harga_text": "teks harga asli dari template",
-  "keterangan": "keterangan/catatan tambahan (carport, kitchen set, dll)",
-  "photo_link": "link google drive atau link foto jika ada, atau string kosong",
-  "kondisi": "kondisi bangunan (Baru/Lama/N/A) dari teks, default N/A",
-  "jenis_properti": "jenis properti (Rumah/Ruko/Kavling/Gudang/Villa/Lainnya) dari teks, default Rumah",
-  "ketersediaan": "status pembangunan (Ready/Indent/N/A) dari teks, default N/A",
-  "tipe_transaksi": "tipe transaksi (Jual/Sewa/Jual/Sewa) dari teks, default Jual",
-  "agent_name": "nama agent jika ada, atau string kosong"
-}
+    const systemPrompt = `Kamu adalah data extractor untuk properti Indonesia.
+${previousData ? `PERHATIAN: Gabungkan data baru ini dengan data sebelumnya.\nData Sebelumnya:\n${JSON.stringify(previousData)}\n` : ''}
+Aturan konversi:
+- M = Milyar = 1.000.000.000, Jt = Juta = 1.000.000
+- Jika disebutkan "kamar mandi setiap lantai", asumsikan jumlah kamar mandi sama dengan jumlah lantai (jika lantai disebutkan).
+- Jika spesifikasi menyatakan 0 (misalnya 0 Kamar Tidur), isi dengan angka 0, bukan null.
+- Jika jenis properti adalah Apartemen/Apartment, maka ukuran "Luas" yang disebutkan adalah Luas Bangunan (lb), biarkan Luas Tanah (lt) null.
 
-Aturan konversi harga (PENTING: "M" = Milyar = ×1.000.000.000, ada 9 nol):
-- "850 Juta" → harga: 850000000, harga_text: "850 Juta"
-- "1.2 M (Nego)" → harga: 1200000000, harga_text: "1.2 M (Nego)"
-- "4M NEGO" → harga: 4000000000, harga_text: "4M NEGO"
-- "Rp 850.000.000" → harga: 850000000
+Contoh 1:
+Teks: "Dijual Rumah di BSD. LT 100 / LB 80. KT 3+1 KM 2. Harga 1.5 M Nego. SHM. Hub: Budi 08123"
+Parameter: kawasan: "BSD", lt: 100, lb: 80, kt: 3, km: 2, harga: 1500000000, harga_text: "1.5 M Nego", sertifikat: "SHM", jenis_properti: "Rumah", tipe_transaksi: "Jual", agent_name: "Budi"
 
-Jika ada field yang tidak ditemukan, isi dengan null (angka) atau string kosong.
-Kembalikan HANYA JSON, tanpa penjelasan.`,
-      { jsonMode: true }
-    );
+Contoh 2:
+Teks: "Disewakan Ruko Gading Serpong 800 Juta/tahun. Kosong. Contact Mawar."
+Parameter: kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/tahun", furnished: "Unfurnished", jenis_properti: "Ruko", tipe_transaksi: "Sewa", agent_name: "Mawar"`;
 
-    const jsonStr = text
-      .trim()
-      .replace(/```(?:json)?\n?/g, "")
-      .replace(/\n?```/g, "")
-      .trim();
-    return JSON.parse(jsonStr) as ParsedListing;
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Teks:\n"""\n${message}\n"""` }
+        ],
+        temperature: 0.1,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "extract_listing_data",
+              description: "Extract structured property listing data from text",
+              parameters: {
+                type: "object",
+                properties: {
+                  kawasan: { type: "string" },
+                  alamat: { type: "string" },
+                  lt: { type: "number" },
+                  lb: { type: "number" },
+                  kt: { type: "number" },
+                  km: { type: "number" },
+                  hadap: { type: "string" },
+                  lantai: { type: "number" },
+                  sertifikat: { type: "string" },
+                  furnished: { type: "string" },
+                  harga: { type: "number", description: "Harga absolut dalam bentuk angka integer Rupiah (contoh: 1500000000)" },
+                  harga_text: { type: "string", description: "Teks harga asli (contoh: '1.5 M Nego')" },
+                  keterangan: { type: "string" },
+                  photo_link: { type: "string" },
+                  kondisi: { type: "string" },
+                  jenis_properti: { type: "string" },
+                  ketersediaan: { type: "string" },
+                  tipe_transaksi: { type: "string" },
+                  agent_name: { type: "string", description: "Nama agen/kontak (biasanya diawali 'Hubungi', 'Contact', 'Info:'). Ambil HANYA namanya saja tanpa nomor telepon." }
+                }
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "extract_listing_data" } }
+      }),
+    });
+
+    if (!response.ok) throw new Error("Groq API Error");
+
+    const data = await response.json();
+    const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+
+    if (toolCall && toolCall.function.name === "extract_listing_data") {
+      const args = JSON.parse(toolCall.function.arguments);
+      
+      return {
+        kawasan: args.kawasan || "",
+        alamat: args.alamat || "",
+        lt: args.lt ?? null,
+        lb: args.lb ?? null,
+        kt: args.kt ?? null,
+        km: args.km ?? null,
+        hadap: args.hadap || "",
+        lantai: args.lantai ?? null,
+        sertifikat: args.sertifikat || "",
+        furnished: args.furnished || "",
+        harga: args.harga ?? 0,
+        harga_text: args.harga_text || "",
+        keterangan: args.keterangan || "",
+        photo_link: args.photo_link || "",
+        kondisi: args.kondisi || "N/A",
+        jenis_properti: args.jenis_properti || "Rumah",
+        ketersediaan: args.ketersediaan || "N/A",
+        tipe_transaksi: args.tipe_transaksi || "Jual",
+        agent_name: args.agent_name || ""
+      } as ParsedListing;
+    }
+    
+    throw new Error("No tool call returned");
   } catch (error) {
     console.error("Failed to parse listing template:", error);
     return null;

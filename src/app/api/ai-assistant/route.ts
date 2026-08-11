@@ -54,8 +54,9 @@ export async function POST(request: Request) {
       if (searchParams.harga_max) query = query.lte("harga", searchParams.harga_max);
       if (searchParams.kt_min) query = query.gte("kt", searchParams.kt_min);
       if (searchParams.km_min) query = query.gte("km", searchParams.km_min);
+      if (searchParams.jenis_properti) query = query.ilike("jenis_properti", `%${searchParams.jenis_properti}%`);
       if (searchParams.keyword) {
-        query = query.or(`kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%`);
+        query = query.or(`kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
       }
 
       const { data: listings, error } = await query;
@@ -90,14 +91,31 @@ export async function POST(request: Request) {
       }
 
       // Check required fields
-      const isComplete = parsedData.kawasan && parsedData.harga && parsedData.lt && parsedData.kt;
+      const jenis = (parsedData.jenis_properti || "").toLowerCase();
+      const isApartment = jenis.includes("apartemen") || jenis.includes("apartment");
+
+      const hasKawasan = !!parsedData.kawasan;
+      const hasHarga = parsedData.harga !== null && parsedData.harga !== undefined && parsedData.harga > 0;
+      
+      let hasArea = false;
+      let areaLabel = "Luas Tanah";
+      if (isApartment) {
+        hasArea = parsedData.lb !== null && parsedData.lb !== undefined;
+        areaLabel = "Luas Bangunan / Ukuran";
+      } else {
+        hasArea = parsedData.lt !== null && parsedData.lt !== undefined;
+      }
+
+      const hasKt = parsedData.kt !== null && parsedData.kt !== undefined;
+
+      const isComplete = hasKawasan && hasHarga && hasArea && hasKt;
 
       if (!isComplete) {
         const missing = [];
-        if (!parsedData.kawasan) missing.push("Kawasan");
-        if (!parsedData.harga) missing.push("Harga");
-        if (!parsedData.lt) missing.push("Luas Tanah");
-        if (!parsedData.kt) missing.push("Kamar Tidur");
+        if (!hasKawasan) missing.push("Kawasan");
+        if (!hasHarga) missing.push("Harga");
+        if (!hasArea) missing.push(areaLabel);
+        if (!hasKt) missing.push("Kamar Tidur");
 
         return NextResponse.json({
           intent: "template_parse_incomplete",
