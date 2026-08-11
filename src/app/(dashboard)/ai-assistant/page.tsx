@@ -166,6 +166,10 @@ export default function AIAssistantPage() {
       
       if (!res.ok) throw new Error(data.error || "Failed to process request");
 
+      if (data.parsedData?.agent_name) {
+        setAgentName(data.parsedData.agent_name);
+      }
+
       setMessages((prev) => [
         ...prev,
         {
