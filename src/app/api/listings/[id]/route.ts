@@ -93,11 +93,11 @@ export async function PUT(
     }
 
     // Convert number fields
-    if (updates.lt) updates.lt = Number(updates.lt);
-    if (updates.lb) updates.lb = Number(updates.lb);
-    if (updates.kt) updates.kt = Number(updates.kt);
-    if (updates.km) updates.km = Number(updates.km);
-    if (updates.harga) updates.harga = Number(updates.harga);
+    if (updates.lt !== undefined && updates.lt !== null) updates.lt = Math.round(Number(updates.lt));
+    if (updates.lb !== undefined && updates.lb !== null) updates.lb = Math.round(Number(updates.lb));
+    if (updates.kt !== undefined && updates.kt !== null) updates.kt = Math.round(Number(updates.kt));
+    if (updates.km !== undefined && updates.km !== null) updates.km = Math.round(Number(updates.km));
+    if (updates.harga !== undefined && updates.harga !== null) updates.harga = Math.round(Number(updates.harga));
 
     const { data, error } = await supabase
       .from("listings")
