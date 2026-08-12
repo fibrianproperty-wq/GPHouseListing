@@ -341,8 +341,8 @@ export default function AIAssistantPage() {
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-sm mb-4 bg-muted/30 p-3 rounded-lg max-h-[350px] overflow-y-auto">
                     {[
-                      { key: 'jenis_properti', label: 'Jenis Properti' },
-                      { key: 'tipe_transaksi', label: 'Tipe Transaksi' },
+                      { key: 'jenis_properti', label: 'Jenis Properti', options: ['Rumah', 'Ruko', 'Kavling', 'Gudang', 'Villa', 'Apartemen', 'Lainnya'] },
+                      { key: 'tipe_transaksi', label: 'Tipe Transaksi', options: ['Jual', 'Sewa', 'Jual/Sewa'] },
                       { key: 'kawasan', label: 'Kawasan' },
                       { key: 'alamat', label: 'Alamat' },
                       { key: 'lt', label: 'Luas Tanah (LT)' },
@@ -351,29 +351,42 @@ export default function AIAssistantPage() {
                       { key: 'km', label: 'Kamar Mandi (KM)' },
                       { key: 'lantai', label: 'Lantai' },
                       { key: 'hadap', label: 'Hadap' },
-                      { key: 'kondisi', label: 'Kondisi' },
+                      { key: 'kondisi', label: 'Kondisi', options: ['Baru', 'Lama', 'N/A'] },
                       { key: 'sertifikat', label: 'Sertifikat' },
                       { key: 'furnished', label: 'Furnished' },
-                      { key: 'ketersediaan', label: 'Ketersediaan' },
+                      { key: 'ketersediaan', label: 'Ketersediaan', options: ['Indent', 'Ready', 'N/A'] },
                       { key: 'harga', label: 'Harga (Angka)' },
                       { key: 'harga_text', label: 'Harga (Teks)' },
                       { key: 'agent_name', label: 'Nama Agent' },
                       { key: 'photo_link', label: 'Link Foto' },
                       { key: 'keterangan', label: 'Keterangan Tambahan', colSpan: 2 }
-                    ].map(({ key, label, colSpan }) => (
+                    ].map(({ key, label, colSpan, options }) => (
                       <div key={key} className={`flex flex-col gap-1 ${colSpan === 2 ? 'col-span-2' : 'col-span-1'}`}>
                         <label className="text-[10px] text-muted-foreground uppercase font-semibold">{label}</label>
-                        <input 
-                          type={['lt', 'lb', 'kt', 'km', 'lantai', 'harga'].includes(key) ? "number" : "text"}
-                          value={msg.parsedData![key as keyof ParsedListing] ?? ""}
-                          onChange={(e) => {
-                            const isNumber = e.target.type === 'number';
-                            const val = isNumber ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value;
-                            handleFieldChange(msg.id, key as keyof ParsedListing, val);
-                          }}
-                          placeholder="-"
-                          className="w-full text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/50"
-                        />
+                        {options ? (
+                          <select
+                            value={msg.parsedData![key as keyof ParsedListing] || ""}
+                            onChange={(e) => handleFieldChange(msg.id, key as keyof ParsedListing, e.target.value)}
+                            className="w-full text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/50"
+                          >
+                            <option value="">- Pilih -</option>
+                            {options.map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input 
+                            type={['lt', 'lb', 'kt', 'km', 'lantai', 'harga'].includes(key) ? "number" : "text"}
+                            value={msg.parsedData![key as keyof ParsedListing] ?? ""}
+                            onChange={(e) => {
+                              const isNumber = e.target.type === 'number';
+                              const val = isNumber ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value;
+                              handleFieldChange(msg.id, key as keyof ParsedListing, val);
+                            }}
+                            placeholder="-"
+                            className="w-full text-xs px-2 py-1.5 border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-primary/50"
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
