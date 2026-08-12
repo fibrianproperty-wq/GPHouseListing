@@ -261,11 +261,11 @@ Aturan konversi:
 
 Contoh 1:
 Teks: "Dijual Rumah di BSD. LT 100 / LB 80. KT 3+1 KM 2. Harga 1.5 M Nego. SHM. Hub: Budi 08123"
-Parameter: kawasan: "BSD", lt: 100, lb: 80, kt: 3, km: 2, harga: 1500000000, harga_text: "1.5 M Nego", sertifikat: "SHM", jenis_properti: "Rumah", tipe_transaksi: "Jual", agent_name: "Budi"
+Parameter: judul: "Rumah di BSD", kawasan: "BSD", lt: 100, lb: 80, kt: 3, km: 2, harga: 1500000000, harga_text: "1.5 M Nego", sertifikat: "SHM", jenis_properti: "Rumah", tipe_transaksi: "Jual", agent_name: "Budi"
 
 Contoh 2:
 Teks: "Disewakan Ruko Gading Serpong 800 Juta/tahun. Kosong. Contact Mawar."
-Parameter: kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/tahun", furnished: "Unfurnished", jenis_properti: "Ruko", tipe_transaksi: "Sewa", agent_name: "Mawar"`;
+Parameter: judul: "Ruko Gading Serpong", kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/tahun", furnished: "Unfurnished", jenis_properti: "Ruko", tipe_transaksi: "Sewa", agent_name: "Mawar"`;
 
     const response = await fetch(GROQ_API_URL, {
       method: "POST",
@@ -309,7 +309,7 @@ Parameter: kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/ta
                   tipe_transaksi: { type: "string", description: "tipe transaksi (Jual/Sewa/Jual/Sewa) dari teks, default Jual" },
                   agent_name: { type: "string", description: "Nama agen/kontak (biasanya diawali 'Hubungi', 'Contact', 'Info:'). Ambil HANYA namanya saja tanpa nomor telepon." }
                 },
-                required: ["kawasan", "harga", "harga_text"]
+                required: ["judul", "kawasan", "harga", "harga_text"]
               }
             }
           }
