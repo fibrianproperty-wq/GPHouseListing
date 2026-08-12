@@ -4,6 +4,7 @@
 
 export interface Listing {
   id: string;
+  judul: string | null;
   kawasan: string | null;
   alamat: string | null;
   lt: number | null;
@@ -32,6 +33,7 @@ export interface Listing {
 }
 
 export interface ListingFormData {
+  judul: string;
   kawasan: string;
   alamat: string;
   lt: number | '';
@@ -125,6 +127,7 @@ export interface TelegramCallbackQuery {
 // ============================================================
 
 export interface ParsedListing {
+  judul: string | null;
   kawasan: string;
   alamat: string;
   lt: number | null;

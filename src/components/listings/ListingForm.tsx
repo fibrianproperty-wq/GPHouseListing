@@ -30,6 +30,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<ListingFormData>({
+    judul: listing?.judul || "",
     kawasan: listing?.kawasan || "",
     alamat: listing?.alamat || "",
     lt: listing?.lt || "",
@@ -81,6 +82,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
     try {
       const payload = {
         ...formData,
+        judul: formData.judul || null,
         lt: formData.lt || null,
         lb: formData.lb || null,
         kt: formData.kt || null,
@@ -171,6 +173,7 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
                         const data = res.data;
                         setFormData(prev => ({
                           ...prev,
+                          judul: data.judul || prev.judul,
                           kawasan: data.kawasan || prev.kawasan,
                           alamat: data.alamat || prev.alamat,
                           lt: data.lt || prev.lt,
@@ -237,9 +240,20 @@ export function ListingForm({ listing, mode }: ListingFormProps) {
         </CardContent>
       </Card>
 
-      {/* Tipe & Status */}
+      {/* Judul & Tipe & Status */}
       <Card>
         <CardContent className="p-5 space-y-4">
+          <div className="space-y-1.5 mb-6">
+            <Label htmlFor="judul" className="text-sm font-semibold text-primary">Judul / Nama Properti</Label>
+            <Input
+              id="judul"
+              placeholder="contoh: Dijual Apartemen Vittoria / Rumah Mewah BSD"
+              value={formData.judul}
+              onChange={(e) => updateField("judul", e.target.value)}
+              className="font-medium"
+            />
+          </div>
+
           <h3 className="font-semibold text-sm">🏠 Tipe & Status Properti</h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

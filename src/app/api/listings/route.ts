@@ -125,6 +125,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const listing = {
+      judul: body.judul || null,
       kawasan: body.kawasan || null,
       alamat: body.alamat || null,
       lt: body.lt !== null && body.lt !== undefined ? Number(body.lt) : null,

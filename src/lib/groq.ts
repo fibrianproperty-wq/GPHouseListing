@@ -289,26 +289,27 @@ Parameter: kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/ta
               parameters: {
                 type: "object",
                 properties: {
-                  kawasan: { type: "string" },
-                  alamat: { type: "string" },
-                  lt: { type: "number" },
-                  lb: { type: "number" },
-                  kt: { type: "number" },
-                  km: { type: "number" },
-                  hadap: { type: "string" },
-                  lantai: { type: "number" },
-                  sertifikat: { type: "string" },
-                  furnished: { type: "string" },
-                  harga: { type: "number", description: "Harga absolut dalam bentuk angka integer Rupiah (contoh: 1500000000)" },
-                  harga_text: { type: "string", description: "Teks harga asli (contoh: '1.5 M Nego')" },
-                  keterangan: { type: "string" },
-                  photo_link: { type: "string" },
-                  kondisi: { type: "string" },
-                  jenis_properti: { type: "string" },
-                  ketersediaan: { type: "string" },
-                  tipe_transaksi: { type: "string" },
+                  judul: { type: "string", description: "Nama properti atau judul listing (misal: 'Apartemen Vittoria', 'Rumah Mewah BSD', 'Ruko Alicante'). Jika tidak disebutkan nama spesifik, buatkan judul singkat berdasarkan jenis, lokasi, atau highlight utama (maksimal 5 kata)." },
+                  kawasan: { type: "string", description: "Nama kawasan/daerah (misal: BSD, Gading Serpong, Bintaro)" },
+                  alamat: { type: "string", description: "Alamat lengkap jalan/blok/nomor (jika ada)" },
+                  lt: { type: "number", description: "Luas tanah dalam angka (0 jika tidak ada)" },
+                  lb: { type: "number", description: "Luas bangunan dalam angka (0 jika tidak ada)" },
+                  kt: { type: "number", description: "Jumlah kamar tidur dalam angka (0 jika tidak ada)" },
+                  km: { type: "number", description: "Jumlah kamar mandi dalam angka (0 jika tidak ada)" },
+                  hadap: { type: "string", description: "Arah hadap bangunan (Utara, Selatan, Timur, Barat, dll)" },
+                  lantai: { type: "number", description: "Jumlah lantai bangunan dalam angka (jika ada)" },
+                  sertifikat: { type: "string", description: "Jenis sertifikat (SHM, SHGB, PPJB, dll)" },
+                  furnished: { type: "string", description: "Status furnished (Full Furnished, Semi Furnished, Kosong)" },
+                  harga: { type: "number", description: "Harga bersih dalam bentuk angka utuh (misal: 850 Juta -> 850000000). PAHAMI KONTEKS: 1 M = 1000000000, 1.5 M = 1500000000." },
+                  harga_text: { type: "string", description: "Harga persis seperti yang tertulis di teks (misal: '850 Juta Nego', '1.5 M')" },
+                  keterangan: { type: "string", description: "Fasilitas lain atau catatan tambahan yang tidak muat di field lain" },
+                  kondisi: { type: "string", description: "Kondisi bangunan (Baru/Lama/N/A)" },
+                  jenis_properti: { type: "string", description: "Jenis properti (Rumah/Ruko/Kavling/Gudang/Villa/Apartemen/Lainnya). Pastikan sesuai enum tersebut." },
+                  ketersediaan: { type: "string", description: "Ketersediaan (Indent/Ready/N/A)" },
+                  tipe_transaksi: { type: "string", description: "tipe transaksi (Jual/Sewa/Jual/Sewa) dari teks, default Jual" },
                   agent_name: { type: "string", description: "Nama agen/kontak (biasanya diawali 'Hubungi', 'Contact', 'Info:'). Ambil HANYA namanya saja tanpa nomor telepon." }
-                }
+                },
+                required: ["kawasan", "harga", "harga_text"]
               }
             }
           }
@@ -326,6 +327,7 @@ Parameter: kawasan: "Gading Serpong", harga: 800000000, harga_text: "800 Juta/ta
       const args = JSON.parse(toolCall.function.arguments);
       
       return {
+        judul: args.judul || null,
         kawasan: args.kawasan || "",
         alamat: args.alamat || "",
         lt: args.lt ?? null,

@@ -92,6 +92,8 @@ export async function PUT(
       }
     }
 
+    if (body.judul !== undefined) updates.judul = body.judul;
+
     // Convert number fields
     if (updates.lt !== undefined && updates.lt !== null) updates.lt = Number(updates.lt);
     if (updates.lb !== undefined && updates.lb !== null) updates.lb = Number(updates.lb);

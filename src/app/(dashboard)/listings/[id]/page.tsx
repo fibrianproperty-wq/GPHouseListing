@@ -111,7 +111,7 @@ export default async function ListingDetailPage({
               </div>
               <div>
                 <h1 className="text-xl font-bold flex flex-wrap items-center gap-2">
-                  {listing.kawasan || "N/A"}
+                  {listing.judul || listing.kawasan || "N/A"}
                   {listing.tipe_transaksi && (
                     <Badge variant="secondary" className="text-xs">
                       {listing.tipe_transaksi}
@@ -123,6 +123,12 @@ export default async function ListingDetailPage({
                     </Badge>
                   )}
                 </h1>
+                {listing.judul && listing.kawasan && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Building2 className="w-3.5 h-3.5" />
+                    {listing.kawasan}
+                  </p>
+                )}
                 {listing.alamat && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
                     <MapPin className="w-3.5 h-3.5" />

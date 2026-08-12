@@ -52,7 +52,7 @@ export function ListingCard({ listing }: ListingCardProps) {
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-sm truncate flex items-center gap-1.5">
-                  {listing.kawasan || "N/A"}
+                  {listing.judul || listing.kawasan || "N/A"}
                   {listing.tipe_transaksi && (
                     <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
                       {listing.tipe_transaksi}
@@ -64,6 +64,12 @@ export function ListingCard({ listing }: ListingCardProps) {
                     </Badge>
                   )}
                 </h3>
+                {listing.judul && listing.kawasan && (
+                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                    <Building2 className="w-3 h-3 shrink-0" />
+                    {listing.kawasan}
+                  </p>
+                )}
                 {listing.alamat && (
                   <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
                     <MapPin className="w-3 h-3 shrink-0" />

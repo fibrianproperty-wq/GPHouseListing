@@ -341,6 +341,7 @@ export default function AIAssistantPage() {
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-sm mb-4 bg-muted/30 p-3 rounded-lg max-h-[350px] overflow-y-auto">
                     {[
+                      { key: 'judul', label: 'Judul / Nama Properti', colSpan: 2 },
                       { key: 'jenis_properti', label: 'Jenis Properti', options: ['Rumah', 'Ruko', 'Kavling', 'Gudang', 'Villa', 'Apartemen', 'Lainnya'] },
                       { key: 'tipe_transaksi', label: 'Tipe Transaksi', options: ['Jual', 'Sewa', 'Jual/Sewa'] },
                       { key: 'kawasan', label: 'Kawasan' },
