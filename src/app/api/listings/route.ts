@@ -73,7 +73,7 @@ export async function GET(request: Request) {
     }
     if (params.search) {
       query = query.or(
-        `kawasan.ilike.%${params.search}%,alamat.ilike.%${params.search}%,agent_name.ilike.%${params.search}%,keterangan.ilike.%${params.search}%`
+        `judul.ilike.%${params.search}%,kawasan.ilike.%${params.search}%,alamat.ilike.%${params.search}%,agent_name.ilike.%${params.search}%,keterangan.ilike.%${params.search}%`
       );
     }
 

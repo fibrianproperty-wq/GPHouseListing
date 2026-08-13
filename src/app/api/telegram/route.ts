@@ -138,7 +138,7 @@ async function handleSearch(chatId: number, text: string) {
       query = query.ilike("jenis_properti", `%${searchParams.jenis_properti}%`);
     }
     if (searchParams.keyword) {
-      query = query.or(`kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
+      query = query.or(`judul.ilike.%${searchParams.keyword}%,kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
     }
 
     const { data: listings, error } = await query;
