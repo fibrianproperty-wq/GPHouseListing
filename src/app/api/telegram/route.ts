@@ -120,7 +120,12 @@ async function handleSearch(chatId: number, text: string) {
       .limit(5);
 
     if (searchParams.kawasan) {
-      query = query.ilike("kawasan", `%${searchParams.kawasan}%`);
+      const k = searchParams.kawasan.toLowerCase();
+      if (k === "serpong") {
+        query = query.or(`kawasan.ilike.%serpong%,kawasan.ilike.%bsd%,judul.ilike.%serpong%,judul.ilike.%bsd%,alamat.ilike.%serpong%,alamat.ilike.%bsd%`);
+      } else {
+        query = query.or(`kawasan.ilike.%${searchParams.kawasan}%,judul.ilike.%${searchParams.kawasan}%,alamat.ilike.%${searchParams.kawasan}%`);
+      }
     }
     if (searchParams.harga_min) {
       query = query.gte("harga", searchParams.harga_min);

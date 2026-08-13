@@ -49,7 +49,14 @@ export async function POST(request: Request) {
         .order("created_at", { ascending: false })
         .limit(10); // Fetch up to 10 for web chat
 
-      if (searchParams.kawasan) query = query.ilike("kawasan", `%${searchParams.kawasan}%`);
+      if (searchParams.kawasan) {
+        const k = searchParams.kawasan.toLowerCase();
+        if (k === "serpong") {
+          query = query.or(`kawasan.ilike.%serpong%,kawasan.ilike.%bsd%,judul.ilike.%serpong%,judul.ilike.%bsd%,alamat.ilike.%serpong%,alamat.ilike.%bsd%`);
+        } else {
+          query = query.or(`kawasan.ilike.%${searchParams.kawasan}%,judul.ilike.%${searchParams.kawasan}%,alamat.ilike.%${searchParams.kawasan}%`);
+        }
+      }
       if (searchParams.harga_min) query = query.gte("harga", searchParams.harga_min);
       if (searchParams.harga_max) query = query.lte("harga", searchParams.harga_max);
       if (searchParams.kt_min) query = query.gte("kt", searchParams.kt_min);
