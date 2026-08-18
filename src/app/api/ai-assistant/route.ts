@@ -51,8 +51,8 @@ export async function POST(request: Request) {
 
       if (searchParams.kawasan) {
         const k = searchParams.kawasan.toLowerCase();
-        if (k === "serpong") {
-          query = query.or(`kawasan.ilike.%serpong%,kawasan.ilike.%bsd%,judul.ilike.%serpong%,judul.ilike.%bsd%,alamat.ilike.%serpong%,alamat.ilike.%bsd%`);
+        if (k.includes("serpong")) {
+          query = query.or(`kawasan.ilike.%serpong%,kawasan.ilike.%bsd%,kawasan.ilike.%gs%,kawasan.ilike.%gading serpong%,judul.ilike.%serpong%,judul.ilike.%bsd%,judul.ilike.%gs%,judul.ilike.%gading serpong%,alamat.ilike.%serpong%,alamat.ilike.%bsd%,alamat.ilike.%gs%,alamat.ilike.%gading serpong%`);
         } else {
           query = query.or(`kawasan.ilike.%${searchParams.kawasan}%,judul.ilike.%${searchParams.kawasan}%,alamat.ilike.%${searchParams.kawasan}%`);
         }
@@ -63,7 +63,12 @@ export async function POST(request: Request) {
       if (searchParams.km_min) query = query.gte("km", searchParams.km_min);
       if (searchParams.jenis_properti) query = query.ilike("jenis_properti", `%${searchParams.jenis_properti}%`);
       if (searchParams.keyword) {
-        query = query.or(`judul.ilike.%${searchParams.keyword}%,kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
+        const keywordLower = searchParams.keyword.toLowerCase();
+        if (keywordLower.includes("serpong")) {
+          query = query.or(`judul.ilike.%${searchParams.keyword}%,kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%,kawasan.ilike.%bsd%,kawasan.ilike.%gs%,kawasan.ilike.%gading serpong%,judul.ilike.%bsd%,judul.ilike.%gs%,judul.ilike.%gading serpong%,alamat.ilike.%bsd%,alamat.ilike.%gs%,alamat.ilike.%gading serpong%,keterangan.ilike.%bsd%,keterangan.ilike.%gs%,keterangan.ilike.%gading serpong%`);
+        } else {
+          query = query.or(`judul.ilike.%${searchParams.keyword}%,kawasan.ilike.%${searchParams.keyword}%,alamat.ilike.%${searchParams.keyword}%,keterangan.ilike.%${searchParams.keyword}%,jenis_properti.ilike.%${searchParams.keyword}%`);
+        }
       }
 
       const { data: listings, error } = await query;

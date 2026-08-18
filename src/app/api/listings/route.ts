@@ -72,9 +72,16 @@ export async function GET(request: Request) {
       query = query.gte("lb", params.lb_min);
     }
     if (params.search) {
-      query = query.or(
-        `judul.ilike.%${params.search}%,kawasan.ilike.%${params.search}%,alamat.ilike.%${params.search}%,agent_name.ilike.%${params.search}%,keterangan.ilike.%${params.search}%`
-      );
+      const searchLower = params.search.toLowerCase();
+      if (searchLower.includes("serpong")) {
+        query = query.or(
+          `judul.ilike.%${params.search}%,kawasan.ilike.%${params.search}%,alamat.ilike.%${params.search}%,agent_name.ilike.%${params.search}%,keterangan.ilike.%${params.search}%,kawasan.ilike.%bsd%,kawasan.ilike.%gs%,kawasan.ilike.%gading serpong%,judul.ilike.%bsd%,judul.ilike.%gs%,judul.ilike.%gading serpong%,alamat.ilike.%bsd%,alamat.ilike.%gs%,alamat.ilike.%gading serpong%,keterangan.ilike.%bsd%,keterangan.ilike.%gs%,keterangan.ilike.%gading serpong%`
+        );
+      } else {
+        query = query.or(
+          `judul.ilike.%${params.search}%,kawasan.ilike.%${params.search}%,alamat.ilike.%${params.search}%,agent_name.ilike.%${params.search}%,keterangan.ilike.%${params.search}%`
+        );
+      }
     }
 
     // Pagination
